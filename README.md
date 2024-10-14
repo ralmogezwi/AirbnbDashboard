@@ -2,7 +2,7 @@
 
 A simple Streamlit app template for you to modify!
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](http://localhost:8502)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://curly-xylophone-4j7pgg9x4jvwcjv5-8502.app.github.dev/)
 
 ### How to run it on your own machine
 
