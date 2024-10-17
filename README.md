@@ -2,7 +2,7 @@
 
 A simple Streamlit app template for you to modify!
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://curly-xylophone-4j7pgg9x4jvwcjv5-8502.app.github.dev/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://airbnbdash.streamlit.app/)
 
 ### How to run it on your own machine
 
