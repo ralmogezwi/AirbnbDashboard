@@ -1,6 +1,6 @@
 import streamlit as st
 
-
+#Initilaizing 3 tabs
 tab1, tab2, tab3 = st.tabs(["Predictions", "Data Viz", "Suggestions"])
 
 with tab1:
