@@ -2,6 +2,8 @@
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://airbnbdash.streamlit.app/)
 
+http://localhost:8501/
+
 ### How to run it on your own machine
 
 1. Install the requirements
