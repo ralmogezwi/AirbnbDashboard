@@ -7,6 +7,10 @@ from math import exp
 from scipy import stats
 from io import BytesIO
 import requests
+import matplotlib.pyplot as plt
+import seaborn as sns
+from math import exp
+
 
 # Set up header and brief description
 with st.container():
@@ -204,14 +208,28 @@ with tab1:
             
             st.info(f"Predicted price is ${round(predicted_price, 2)}")
 
-            # Create a download button for the CSV file
-            st.download_button(
-                label="Download CSV file",
-                data=csv,
-                file_name="predicted_price_output.csv",
-                mime='text/csv'
+          
+            # Dropdown for selecting feature to correlate
+            selected_feature = st.selectbox(
+                'Select a feature to correlate with Predicted Price',
+                options=[col for col in X_test_reordered.columns if col != 'predicted_price']
             )
+
+            # Calculate correlation and plot
+            if selected_feature:
+                correlation = X_test_reordered[['predicted_price', selected_feature]].corr().iloc[0, 1]
+                st.write(f"Correlation between Predicted Price and {selected_feature}: {correlation:.2f}")
+                
+                # Plotting
+                plt.figure(figsize=(10, 8))
+                sns.scatterplot(data=X_test_reordered, x=selected_feature, y='predicted_price')
+                plt.title(f'Correlation between Predicted Price and {selected_feature}')
+                plt.xlabel(selected_feature)
+                plt.ylabel('Predicted Price')
+                st.pyplot(plt)
     
+
+
     # st.markdown('---')
     # st.subheader('Sentiment Analysis')
     # st.markdown('Write a review and get the predicted sentiment!')
