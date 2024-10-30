@@ -197,8 +197,20 @@ with tab1:
 
             # Reorder the DataFrame columns to match the desired order
             X_test_reordered = X_test[desired_order]
+            predicted_price = exp(xgb_model.predict(X_test))
+            X_test_reordered.loc[:, 'predicted_price'] = predicted_price
+            csv = X_test_reordered.to_csv(index=False).encode('utf-8')
+
             
-            st.info(f"Predicted price is ${round(exp(xgb_model.predict(X_test)), 2)}")
+            st.info(f"Predicted price is ${round(predicted_price, 2)}")
+
+            # Create a download button for the CSV file
+            st.download_button(
+                label="Download CSV file",
+                data=csv,
+                file_name="predicted_price_output.csv",
+                mime='text/csv'
+            )
     
     # st.markdown('---')
     # st.subheader('Sentiment Analysis')
