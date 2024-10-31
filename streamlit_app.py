@@ -9,6 +9,8 @@ from io import BytesIO
 import requests
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 # Set up header and brief description
@@ -23,8 +25,9 @@ tab1, tab2, tab3 = st.tabs(["Predictions", "Data Viz", "Suggestions"])
 with tab1:
 
     # Begin new section for listings features
-    st.markdown('---')
     st.subheader('Listing characteristics')
+    st.markdown('---')
+
     col1, col2 = st.columns(2)
     with col1:
         city = st.selectbox('City',
@@ -49,8 +52,9 @@ with tab1:
             ['TV', 'Wifi'])
 
     # Section for host info
-    st.markdown('---')
     st.subheader('Host Information')
+    st.markdown('---')
+
     col1, col2 = st.columns(2)
     with col1:
         gender = st.selectbox('Host gender', ('Female', 'Male', 'Other/Corporation'))
@@ -68,8 +72,9 @@ with tab1:
         'Number of days your host has been using Airbnb',
         1, 5000, 2000)
 
-    st.markdown('---')
     st.subheader("Guests' feedback")
+    st.markdown('---')
+
     col1, col2, col3 = st.columns(3)
     with col1:
         location = st.slider('Location rating', 1.0, 5.0, 4.0, step=0.5)
@@ -301,25 +306,71 @@ large_sample_data['predicted_price'] = np.exp(xgb_model.predict(large_sample_dat
 # Save in session state
 st.session_state['X_test_reordered'] = large_sample_data
 
+relevant_features = [
+    'host_since', 'host_response_rate', 'host_acceptance_rate', 'host_is_superhost',
+    'accommodates', 'bathrooms', 'bedrooms', 'beds', 'minimum_nights', 'availability_30',
+    'number_of_reviews', 'review_scores_rating', 'review_scores_cleanliness',
+    'review_scores_location', 'instant_bookable', 'tv', 'air_conditioning',
+    'heating', 'pool'
+]
 
+
+
+# Correlation Visualization in Tab 2
 with tab2:
-    st.header("Feature Correlation with Predicted Price")
+    st.subheader("Feature Correlation with Predicted Price")
+    st.markdown('---')
+
     # Check if prediction data is available
     if 'X_test_reordered' in st.session_state:
         X_test_reordered = st.session_state['X_test_reordered']
-        correlations = X_test_reordered.corr()['predicted_price'].sort_values(ascending=False)
+
+        # Filter to include only relevant features and the predicted price
+        filtered_data = X_test_reordered[relevant_features + ['predicted_price']]
+        correlations = filtered_data.corr()['predicted_price'].sort_values(ascending=False)
         
         # Select top features with highest correlation
         num_features = st.slider("Select number of top correlated features", 5, len(correlations)-1, 10)
         top_features = correlations.iloc[1:num_features+1]  # Exclude 'predicted_price' itself
 
-        # Plotting
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x=top_features.values, y=top_features.index, palette="viridis")
-        plt.xlabel("Correlation Coefficient")
-        plt.ylabel("Features")
-        plt.title("Top Correlated Features with Predicted Price")
-        st.pyplot(plt)
+        # Create an interactive Plotly bar plot
+        fig = go.Figure(go.Bar(
+            x=top_features.values,
+            y=top_features.index,
+            orientation='h',
+            marker=dict(color=top_features.values, colorscale='Viridis'),
+            text=top_features.values,
+            textposition='auto'
+        ))
+
+        fig.update_layout(
+            title="Top Correlated Features with Predicted Price",
+            xaxis_title="Correlation Coefficient",
+            yaxis_title="Features",
+            yaxis=dict(autorange="reversed"),
+            template="plotly_dark"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    if 'X_test_reordered' in st.session_state:
+        X_test_reordered = st.session_state['X_test_reordered']
+        st.subheader("Price vs. Key Feature Plot")
+        st.markdown('---')
+
+        feature = st.selectbox(
+        "Select a feature to compare with predicted price:",
+        options=[col for col in filtered_data.columns if col != "predicted_price"]
+    )
+
+        # Plot with Plotly
+        fig = px.scatter(filtered_data, x=feature, y="predicted_price", trendline="ols",
+                        title=f"Predicted Price vs {feature.capitalize()}",
+                        labels={"predicted_price": "Predicted Price", feature: feature.capitalize()})
+
+        fig.update_layout(width=800, height=600)
+        st.plotly_chart(fig)
+
 
 
     if 'disabled' not in st.session_state:
