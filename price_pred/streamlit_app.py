@@ -9,7 +9,6 @@ from io import BytesIO
 import requests
 import matplotlib.pyplot as plt
 import seaborn as sns
-from math import exp
 
 
 # Set up header and brief description
@@ -195,6 +194,8 @@ with tab1:
                 0.3858, 0, 114, 0, 1.1963, 1, -0.3559, -0.7283, 0.5242, 17, tv, netflix, gym, elevator, 
                 fridge, heat, hair, air, tub, oven, bbq, cams, workspace, coffee, backyard, outdoor, greet, 
                 pool, beach, patio, luggage, furniture, gender, 0.9643, 0.9029, 0.9650, no_review))
+            
+            
 
             # Create DataFrame
             X_test = pd.DataFrame(data=data, columns=current_feature_names)
@@ -203,36 +204,123 @@ with tab1:
             X_test_reordered = X_test[desired_order]
             predicted_price = exp(xgb_model.predict(X_test))
             X_test_reordered.loc[:, 'predicted_price'] = predicted_price
-            csv = X_test_reordered.to_csv(index=False).encode('utf-8')
-
             
             st.info(f"Predicted price is ${round(predicted_price, 2)}")
-
-          
-            # Dropdown for selecting feature to correlate
-            selected_feature = st.selectbox(
-                'Select a feature to correlate with Predicted Price',
-                options=[col for col in X_test_reordered.columns if col != 'predicted_price']
-            )
-
-            # Calculate correlation and plot
-            if selected_feature:
-                correlation = X_test_reordered[['predicted_price', selected_feature]].corr().iloc[0, 1]
-                st.write(f"Correlation between Predicted Price and {selected_feature}: {correlation:.2f}")
-                
-                # Plotting
-                plt.figure(figsize=(10, 8))
-                sns.scatterplot(data=X_test_reordered, x=selected_feature, y='predicted_price')
-                plt.title(f'Correlation between Predicted Price and {selected_feature}')
-                plt.xlabel(selected_feature)
-                plt.ylabel('Predicted Price')
-                st.pyplot(plt)
-    
+            st.session_state['X_test_reordered'] = X_test_reordered
 
 
-    # st.markdown('---')
-    # st.subheader('Sentiment Analysis')
-    # st.markdown('Write a review and get the predicted sentiment!')
+# Generate or load a large sample dataset
+def generate_large_sample_data(n_samples=100):
+    data = {
+    'description': np.random.choice([0, 1], n_samples),
+    'host_since': np.random.randint(500, 5000, n_samples),
+    'host_response_time': np.random.choice([1, 2, 3, 4], n_samples),
+    'host_response_rate': np.random.uniform(50, 100, n_samples),
+    'host_acceptance_rate': np.random.uniform(50, 100, n_samples),
+    'host_is_superhost': np.random.choice([0, 1], n_samples),
+    'host_listings_count': np.random.randint(1, 20, n_samples),
+    'host_has_profile_pic': np.random.choice([0, 1], n_samples),
+    'host_identity_verified': np.random.choice([0, 1], n_samples),
+    'room_type': np.random.choice([1, 2, 3, 4], n_samples),
+    'accommodates': np.random.randint(1, 16, n_samples),
+    'bathrooms': np.random.randint(1, 5, n_samples),
+    'bedrooms': np.random.randint(1, 5, n_samples),
+    'beds': np.random.randint(1, 10, n_samples),
+    'minimum_nights': np.random.randint(1, 15, n_samples),
+    'maximum_nights': np.random.randint(30, 365, n_samples),
+    'minimum_nights_avg_ntm': np.random.uniform(1, 15, n_samples),
+    'maximum_nights_avg_ntm': np.random.uniform(30, 365, n_samples),
+    'has_availability': np.random.choice([0, 1], n_samples),
+    'availability_30': np.random.randint(0, 30, n_samples),
+    'availability_90': np.random.randint(0, 90, n_samples),
+    'availability_365': np.random.randint(0, 365, n_samples),
+    'number_of_reviews': np.random.randint(0, 500, n_samples),
+    'number_of_reviews_ltm': np.random.randint(0, 200, n_samples),
+    'number_of_reviews_l30d': np.random.randint(0, 30, n_samples),
+    'first_review': np.random.uniform(1, 2000, n_samples),
+    'last_review': np.random.uniform(1, 2000, n_samples),
+    'review_scores_rating': np.random.uniform(1, 5, n_samples),
+    'review_scores_accuracy': np.random.uniform(1, 5, n_samples),
+    'review_scores_cleanliness': np.random.uniform(1, 5, n_samples),
+    'review_scores_checkin': np.random.uniform(1, 5, n_samples),
+    'review_scores_communication': np.random.uniform(1, 5, n_samples),
+    'review_scores_location': np.random.uniform(1, 5, n_samples),
+    'review_scores_value': np.random.uniform(1, 5, n_samples),
+    'instant_bookable': np.random.choice([0, 1], n_samples),
+    'calculated_host_listings_count': np.random.uniform(1, 50, n_samples),
+    'calculated_entire': np.random.choice([0, 1], n_samples),
+    'calculated_private': np.random.choice([0, 1], n_samples),
+    'calculated_shared': np.random.choice([0, 1], n_samples),
+    'neighborhood': np.random.randint(1, 20, n_samples),
+    'neighborhood_group': np.random.randint(1, 5, n_samples),
+    'inactive': np.random.choice([0, 1], n_samples),
+    'reviews_month': np.random.uniform(0, 5, n_samples),
+    'responds': np.random.choice([0, 1], n_samples),
+    'geo_x': np.random.uniform(-180, 180, n_samples),
+    'geo_y': np.random.uniform(-90, 90, n_samples),
+    'geo_z': np.random.uniform(-90, 90, n_samples),
+    'property': np.random.choice([0, 1], n_samples),
+    'tv': np.random.choice([0, 1], n_samples),
+    'netflix': np.random.choice([0, 1], n_samples),
+    'gym': np.random.choice([0, 1], n_samples),
+    'elevator': np.random.choice([0, 1], n_samples),
+    'fridge': np.random.choice([0, 1], n_samples),
+    'heating': np.random.choice([0, 1], n_samples),
+    'hair_dryer': np.random.choice([0, 1], n_samples),
+    'air_conditioning': np.random.choice([0, 1], n_samples),
+    'hot_tub': np.random.choice([0, 1], n_samples),
+    'oven': np.random.choice([0, 1], n_samples),
+    'bbq': np.random.choice([0, 1], n_samples),
+    'security cameras': np.random.choice([0, 1], n_samples),
+    'workspace': np.random.choice([0, 1], n_samples),
+    'coffee': np.random.choice([0, 1], n_samples),
+    'backyard': np.random.choice([0, 1], n_samples),
+    'outdoor_dining': np.random.choice([0, 1], n_samples),
+    'greets': np.random.choice([0, 1], n_samples),
+    'pool': np.random.choice([0, 1], n_samples),
+    'beachfront': np.random.choice([0, 1], n_samples),
+    'patio': np.random.choice([0, 1], n_samples),
+    'luggage': np.random.choice([0, 1], n_samples),
+    'furniture': np.random.choice([0, 1], n_samples),
+    'nlp_gender': np.random.choice([0, 1], n_samples),
+    'sent_median': np.random.uniform(0, 1, n_samples),
+    'sent_mean': np.random.uniform(0, 1, n_samples),
+    'sent_mode': np.random.uniform(0, 1, n_samples),
+    'no_review': np.random.choice([0, 1], n_samples)
+}
+    # Convert to DataFrame and return
+    return pd.DataFrame(data)
+
+large_sample_data = generate_large_sample_data()
+with open('price_pred/xgb_reg.pkl', 'rb') as f:
+    xgb_model = pickle.load(f)
+
+# Predict and add predicted prices
+large_sample_data['predicted_price'] = np.exp(xgb_model.predict(large_sample_data))
+
+# Save in session state
+st.session_state['X_test_reordered'] = large_sample_data
+
+
+with tab2:
+    st.header("Feature Correlation with Predicted Price")
+    # Check if prediction data is available
+    if 'X_test_reordered' in st.session_state:
+        X_test_reordered = st.session_state['X_test_reordered']
+        correlations = X_test_reordered.corr()['predicted_price'].sort_values(ascending=False)
+        
+        # Select top features with highest correlation
+        num_features = st.slider("Select number of top correlated features", 5, len(correlations)-1, 10)
+        top_features = correlations.iloc[1:num_features+1]  # Exclude 'predicted_price' itself
+
+        # Plotting
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x=top_features.values, y=top_features.index, palette="viridis")
+        plt.xlabel("Correlation Coefficient")
+        plt.ylabel("Features")
+        plt.title("Top Correlated Features with Predicted Price")
+        st.pyplot(plt)
+
 
     if 'disabled' not in st.session_state:
         st.session_state['disabled'] = False
