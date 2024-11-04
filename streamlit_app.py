@@ -294,7 +294,7 @@ with tab1:
 
 
 # Generate or load a large sample dataset
-def generate_large_sample_data(n_samples=100):
+def generate_large_sample_data(n_samples=200):
     data = {
     'description': np.random.choice([0, 1], n_samples),
     'host_since': np.random.randint(500, 5000, n_samples),
