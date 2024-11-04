@@ -11,23 +11,101 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
+import base64
+
+
+# Background image path
+background_image_path = "airbnb.png"
+with open(background_image_path, "rb") as image_file:
+    encoded_bg_image = base64.b64encode(image_file.read()).decode()
+
+# CSS for styling
+page_bg_img = f'''
+<style>
+.stApp {{
+    background-image: url("data:image/jpeg;base64,{encoded_bg_image}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+}}
+.stApp::before {{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 0;
+}}
+.stApp > div:first-child {{
+    position: relative;
+    z-index: 1;
+}}
+/* Set all primary text elements to white */
+h1, h2, h3, h4, h5, h6, p, label {{
+    color: white !important;
+}}
+.stNumberInput label, .stSelectbox label {{
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    color: #DCDCDC !important;
+}}
+/* Button styling */
+.stButton>button {{
+    color: white !important;
+    background-color: #32CD32 !important;
+    border: none;
+}}
+/* Markdown styling */
+.css-1v3fvcr p {{
+    color: white !important;
+}}
+/* Styling for prediction card */
+.prediction-card {{
+    background: linear-gradient(135deg, #ff6f61, #f7b731);
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    font-size: 1.8rem;
+    color: white;
+    animation: reveal 1.5s ease;
+}}
+.white-text {{
+    color: white !important;
+}}
+/* Transparent background for tabs */
+div[data-baseweb="tab"] {{
+    background-color: rgba(0, 0, 0, 0) !important;
+}}
+/* Transparent background for active tab content */
+.css-1d391kg {{
+    background-color: rgba(0, 0, 0, 0.4) !important;
+}}
+@keyframes reveal {{
+    0% {{ transform: scale(0); opacity: 0; }}
+    100% {{ transform: scale(1); opacity: 1; }}
+}}
+</style>
+'''
+st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
 # Set up header and brief description
 with st.container():
-    st.title('Airbnb Price Predictor')
+    st.title('Airbnb Dashboard')
     # st.markdown('Simulate real estate market asset valuations with AI!')
-    st.markdown('Provide data about your Airbnb listing and get predictions!')
-
+    #st.markdown('Provide data about your Airbnb listing and get predictions!')
+    st.markdown('Select your desired tab:')
 #Initilaizing 3 tabs
 tab1, tab2, tab3 = st.tabs(["Predictions", "Data Viz", "Suggestions"])
 
 with tab1:
-
     # Begin new section for listings features
     st.subheader('Listing characteristics')
-    st.markdown('---')
-
     col1, col2 = st.columns(2)
     with col1:
         city = st.selectbox('City',
@@ -52,8 +130,8 @@ with tab1:
             ['TV', 'Wifi'])
 
     # Section for host info
-    st.subheader('Host Information')
     st.markdown('---')
+    st.subheader('Host Information')
 
     col1, col2 = st.columns(2)
     with col1:
@@ -71,9 +149,10 @@ with tab1:
     host_since = st.slider(
         'Number of days your host has been using Airbnb',
         1, 5000, 2000)
-
-    st.subheader("Guests' feedback")
+    
     st.markdown('---')
+    st.subheader("Guests' feedback")
+    
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -319,7 +398,6 @@ relevant_features = [
 # Correlation Visualization in Tab 2
 with tab2:
     st.subheader("Feature Correlation with Predicted Price")
-    st.markdown('---')
 
     # Check if prediction data is available
     if 'X_test_reordered' in st.session_state:
@@ -355,8 +433,9 @@ with tab2:
 
     if 'X_test_reordered' in st.session_state:
         X_test_reordered = st.session_state['X_test_reordered']
-        st.subheader("Price vs. Key Feature Plot")
         st.markdown('---')
+        st.subheader("Price vs. Key Feature Plot")
+        
 
         feature = st.selectbox(
         "Select a feature to compare with predicted price:",
@@ -380,29 +459,7 @@ with tab2:
     def disable():
         st.session_state['disabled'] = True
 
-        
-    # user_input = st.text_input(
-    #     'Introduce your own review!', 
-    #     disabled=st.session_state.disabled, 
-    #     on_change=disable
-    # )
 
-    # run_sent = st.button('Estimate sentiment')
-
-    # if run_sent:
-    #     # Load transformer for sentiment analysis
-    #     model, tokenizer, config = load_model()
-    #     text = preprocess(user_input)
-    #     encoded_input = tokenizer(text, return_tensors='pt')
-    #     output = model(**encoded_input)
-    #     scores = output[0][0].detach().numpy()
-    #     scores = softmax(scores)
-
-    #     # Print labels and scores
-    #     ranking = np.argsort(scores)
-    #     ranking = ranking[::-1]
-    #     sentiment = config.id2label[ranking[0]]
-    #     st.info(f'Predicted sentiment is {sentiment}')
 
     # st.markdown('---')
     # st.subheader('About')

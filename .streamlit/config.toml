@@ -1,0 +1,8 @@
+# .streamlit/config.toml
+[theme]
+base = "dark"  # Set the base theme to dark
+primaryColor = "#FF5A5F"  # Example Airbnb primary color
+secondaryBackgroundColor = "#1E1E1E"  # Slightly lighter dark color for contrast
+textColor = "#F2F2F2"  # Light text color for readability
+font = "sans serif"  # Optional, you can choose any available font
+
