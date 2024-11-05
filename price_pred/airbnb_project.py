@@ -1,5 +1,5 @@
 # Load required libraries and custom functions
-from Functions.ml_models import *
+# from Functions.ml_models import *
 # from Functions.dl_models import *
 from Functions.cv_functions import *
 from Functions.nlp_functions import *
@@ -358,52 +358,52 @@ train = [X_train, y_train]
 valid = [X_valid, y_valid]
 test = [X_test, y_test]
 
-# Retrieve results from Bayesian Ridge Regression
-rmse, hyperparams, intercept, coefs = bayesian_regression(train, valid, test)
-print('---------------')
-print(rmse)
-print('---------------')
-print(hyperparams)
-print('---------------')
-print(intercept)
-print('---------------')
-print(coefs)
+# # Retrieve results from Bayesian Ridge Regression
+# rmse, hyperparams, intercept, coefs = bayesian_regression(train, valid, test)
+# print('---------------')
+# print(rmse)
+# print('---------------')
+# print(hyperparams)
+# print('---------------')
+# print(intercept)
+# print('---------------')
+# print(coefs)
 
-# Define top features
-top_features = ['bathrooms', 'beds', 'bedrooms', 'property',
-                'accommodates', 'bbq', 'hot_tub', 'beachfront'
-                'calculated_host_listings_count_shared_rooms',
-                'calculated_host_listings_count_private_rooms',
-                'host_since', 'geo_x', 'geo_y', 'geo_z',
-                'availability_365', 'neighborhood_group',
-                'first_review', 'last_review', 'host_listings_count',
-                'reviews_month'
-               ]
+# # Define top features
+# top_features = ['bathrooms', 'beds', 'bedrooms', 'property',
+#                 'accommodates', 'bbq', 'hot_tub', 'beachfront'
+#                 'calculated_host_listings_count_shared_rooms',
+#                 'calculated_host_listings_count_private_rooms',
+#                 'host_since', 'geo_x', 'geo_y', 'geo_z',
+#                 'availability_365', 'neighborhood_group',
+#                 'first_review', 'last_review', 'host_listings_count',
+#                 'reviews_month'
+#                ]
 
-# Create dataset for reduced model sampling
-train_top = X_train.loc[:, top_features]
+# # Create dataset for reduced model sampling
+# train_top = X_train.loc[:, top_features]
 
-# Retrieve posterior distribution of weights
-complete_trace, reduced_trace = posterior_weights(train, train_top)
+# # Retrieve posterior distribution of weights
+# complete_trace, reduced_trace = posterior_weights(train, train_top)
 
-# Get credibe intervals
-coefs_complete = az.summary(complete_trace, kind='stats')
-print(coefs_complete)
+# # Get credibe intervals
+# coefs_complete = az.summary(complete_trace, kind='stats')
+# print(coefs_complete)
 
-coefs_reduced = az.summary(reduced_trace, kind='stats')
-print(coefs_reduced)
+# coefs_reduced = az.summary(reduced_trace, kind='stats')
+# print(coefs_reduced)
 
-# Plot posterior distributions
-az.plot_posterior(complete_trace, hdi_prob=0.95)
-az.plot_posterior(reduced_trace, hdi_prob=0.95)
+# # Plot posterior distributions
+# az.plot_posterior(complete_trace, hdi_prob=0.95)
+# az.plot_posterior(reduced_trace, hdi_prob=0.95)
 
-# Compare Bayesian models
-compare_dict = {
-    "full_model": complete_trace, 
-    "restricted_model": reduced_trace
-    }
+# # Compare Bayesian models
+# compare_dict = {
+#     "full_model": complete_trace, 
+#     "restricted_model": reduced_trace
+#     }
 
-print(az.compare(compare_dict, scale='deviance'))
+# print(az.compare(compare_dict, scale='deviance'))
 
 # # Retrieve results from Elastic Net Regularized Linear Regression
 # rmse, hyperparams, intercept, coefs = elastic_net_OLS(train, valid, test)
@@ -478,33 +478,33 @@ print(az.compare(compare_dict, scale='deviance'))
 # # Retrieve results from Bayesian Neural Network
 # rmse = BNN(train, valid, test)
     
-# Retrieve results from XGBoost and feature importance plots
-model, rmse, hyper, data_gain, data_weight = XGBoost(train, valid, test)
-print('---------------')
-print(rmse)
-print('---------------')
-print(hyper)
-print('---------------')
-data_gain.nlargest(40, columns='score').plot(kind='barh', figsize=(20, 10))
-print('---------------')
-data_weight.nlargest(40, columns='score').plot(kind='barh', figsize=(20, 10))
+# # Retrieve results from XGBoost and feature importance plots
+# model, rmse, hyper, data_gain, data_weight = XGBoost(train, valid, test)
+# print('---------------')
+# print(rmse)
+# print('---------------')
+# print(hyper)
+# print('---------------')
+# data_gain.nlargest(40, columns='score').plot(kind='barh', figsize=(20, 10))
+# print('---------------')
+# data_weight.nlargest(40, columns='score').plot(kind='barh', figsize=(20, 10))
 
-# XAI methods to interpret XGBoost outputs
-# SHAP values and plots for Global Interpretability
-shap_values = XAI_SHAP(model, test[0], 'global')
+# # XAI methods to interpret XGBoost outputs
+# # SHAP values and plots for Global Interpretability
+# shap_values = XAI_SHAP(model, test[0], 'global')
 
-# SHAP values and plots for Local Interpretability
-shap_values = XAI_SHAP(model, test[0], 'local', 10)
-shap_values = XAI_SHAP(model, test[0], 'local', 11)
-shap_values = XAI_SHAP(model, test[0], 'local', 12)
+# # SHAP values and plots for Local Interpretability
+# shap_values = XAI_SHAP(model, test[0], 'local', 10)
+# shap_values = XAI_SHAP(model, test[0], 'local', 11)
+# shap_values = XAI_SHAP(model, test[0], 'local', 12)
 
-# PDP and ICE plots for Global and Local interpretability
-XAI_PDP_ICE(model, test[0], 2, 5, ice=False)
-XAI_PDP_ICE(model, test[0], 11, 12, ice=False)
-XAI_PDP_ICE(model, test[0], 27, 28, ice=False)
-XAI_PDP_ICE(model, test[0], 2, 5, ice=True)
-XAI_PDP_ICE(model, test[0], 8, 9, ice=True)
-XAI_PDP_ICE(model, test[0], 11, 12, ice=True)
-XAI_PDP_ICE(model, test[0], 16, 17, ice=True)
-XAI_PDP_ICE(model, test[0], 71, 72, ice=True)
-XAI_PDP_ICE(model, test[0], 27, 28, ice=True)
+# # PDP and ICE plots for Global and Local interpretability
+# XAI_PDP_ICE(model, test[0], 2, 5, ice=False)
+# XAI_PDP_ICE(model, test[0], 11, 12, ice=False)
+# XAI_PDP_ICE(model, test[0], 27, 28, ice=False)
+# XAI_PDP_ICE(model, test[0], 2, 5, ice=True)
+# XAI_PDP_ICE(model, test[0], 8, 9, ice=True)
+# XAI_PDP_ICE(model, test[0], 11, 12, ice=True)
+# XAI_PDP_ICE(model, test[0], 16, 17, ice=True)
+# XAI_PDP_ICE(model, test[0], 71, 72, ice=True)
+# XAI_PDP_ICE(model, test[0], 27, 28, ice=True)
