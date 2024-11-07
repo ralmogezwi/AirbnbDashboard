@@ -97,7 +97,6 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 # Set up header and brief description
 with st.container():
     st.title('Airbnb Dashboard')
-    # st.markdown('Simulate real estate market asset valuations with AI!')
     #st.markdown('Provide data about your Airbnb listing and get predictions!')
     st.markdown('Select your desired tab:')
 #Initilaizing 3 tabs
