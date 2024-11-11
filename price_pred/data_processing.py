@@ -7,10 +7,11 @@ def clean_data(df):
     
     data = df[[
         # 'host_since',
+        'description',
         'host_location',
         'host_response_time', 'host_response_rate', 'host_acceptance_rate',
         'host_is_superhost',
-        'host_neighbourhood',
+        # 'host_neighbourhood',
         'host_listings_count',
         # 'host_total_listings_count',
         'host_has_profile_pic', 'host_identity_verified',
@@ -42,6 +43,9 @@ def clean_data(df):
     # Convert t/f to integers
     for feature in ['host_has_profile_pic', 'host_is_superhost', 'host_identity_verified', 'has_availability', 'instant_bookable']:
         data[feature] = data[feature].map({'t': 1, 'f': 0})
+    
+    # See whether description exists
+    data['description'] = np.where(data['description'].isna() | (data['description'] == ''), 0, 1)
     
     # Convert bathroom text to bathroom type
     data['bathroom_type'] = data['bathrooms_text'].apply(lambda data: 'private' if 'private' in str(data).lower() else ('shared' if 'shared' in str(data).lower() else None))

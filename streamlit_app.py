@@ -108,25 +108,29 @@ with tab1:
     col1, col2 = st.columns(2)
     with col1:
         city = st.selectbox('City',
-                                ('Washington, D.C.', 'New York City', 'Los Angeles'))
-        accommodates = st.slider('Maximum Capacity', 1, 16, 4)
-        bathrooms = st.slider('Number of bathrooms', 1, 9, 2)
+                                ('Chicago', 'New York City', 'Los Angeles'))
+        
+        if city=='Chicago':
+            data = pd.read_csv('price_pred/chi_clean.csv')
+        if city=='New York City':
+            data = pd.read_csv('price_pred/nyc_clean.csv')
+        if city=='Los Angeles':
+            data = pd.read_csv('price_pred/la_clean.csv')
+
+        accommodates = st.slider('Maximum Capacity', data['accommodates'].min(), data['accommodates'].max(), 4)
+        bathrooms = st.slider('Number of bathrooms', data['bathrooms'].min(), data['bathrooms'].max(), 2)
         room_type = st.selectbox('Room Type',
-                                ('Private room', 'Entire apartment', 'Shared room', 'Hotel room'))
+                                data['room_type'].unique())
         instant = st.selectbox('Can the listing be instantly booked?',
                             ('No', 'Yes'))
     with col2:
-        beds = st.slider('Number of beds', 1, 32, 2)
-        bedrooms = st.slider('Number of bedrooms', 1, 24, 2)
-        min_nights = st.slider('Minimum number of nights', 1, 20, 3)
+        beds = st.slider('Number of beds', data['beds'].min(), data['beds'].max(), 2)
+        bedrooms = st.slider('Number of bedrooms', data['bedrooms'].min(), data['bedrooms'].max(), 2)
+        min_nights = st.slider('Minimum number of nights', data['minimum_nights'].min(), data['minimum_nights'].max(), 3)
         amenities = st.multiselect(
             'Select available amenities',
-            ['TV', 'Wifi', 'Netflix', 'Swimming pool', 'Hot tub', 'Gym', 'Elevator',
-            'Fridge', 'Heating', 'Air Conditioning', 'Hair dryer', 'BBQ', 'Oven',
-            'Security cameras', 'Workspace', 'Coffee maker', 'Backyard',
-            'Outdoor dining', 'Host greeting', 'Beachfront', 'Patio',
-            'Luggage dropoff', 'Furniture'],
-            ['TV', 'Wifi'])
+            list(data.columns[-20:]),)
+            # ['TV', 'Wifi'])
 
     # Section for host info
     st.markdown('---')
