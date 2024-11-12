@@ -111,22 +111,22 @@ with tab1:
                                 ('Chicago', 'New York City', 'Los Angeles'))
         
         if city=='Chicago':
-            data = pd.read_csv('price_pred/chi_clean.csv')
+            data = pd.read_csv('price_pred/chi_ean.csv')
         if city=='New York City':
             data = pd.read_csv('price_pred/nyc_clean.csv')
         if city=='Los Angeles':
             data = pd.read_csv('price_pred/la_clean.csv')
 
-        accommodates = st.slider('Maximum Capacity', data['accommodates'].min(), data['accommodates'].max(), 4)
-        bathrooms = st.slider('Number of bathrooms', data['bathrooms'].min(), data['bathrooms'].max(), 2)
+        accommodates = st.slider('Maximum Capacity', int(data['accommodates'].min()), int(data['accommodates'].max()), 4)
+        bathrooms = st.slider('Number of bathrooms', int(data['bathrooms'].min()), int(data['bathrooms'].max()), 2)
         room_type = st.selectbox('Room Type',
                                 data['room_type'].unique())
         instant = st.selectbox('Can the listing be instantly booked?',
                             ('No', 'Yes'))
     with col2:
-        beds = st.slider('Number of beds', data['beds'].min(), data['beds'].max(), 2)
-        bedrooms = st.slider('Number of bedrooms', data['bedrooms'].min(), data['bedrooms'].max(), 2)
-        min_nights = st.slider('Minimum number of nights', data['minimum_nights'].min(), data['minimum_nights'].max(), 3)
+        beds = st.slider('Number of beds', int(data['beds'].min()), int(data['beds'].max()), 2)
+        bedrooms = st.slider('Number of bedrooms', int(data['bedrooms'].min()), int(data['bedrooms'].max()), 2)
+        min_nights = st.slider('Minimum number of nights', int(data['minimum_nights'].min()), int(data['minimum_nights'].max()), 3)
         amenities = st.multiselect(
             'Select available amenities',
             list(data.columns[-20:]),)
