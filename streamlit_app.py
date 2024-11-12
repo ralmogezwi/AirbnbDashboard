@@ -111,7 +111,7 @@ with tab1:
                                 ('Chicago', 'New York City', 'Los Angeles'))
         
         if city=='Chicago':
-            data = pd.read_csv('price_pred/chi_ean.csv')
+            data = pd.read_csv('price_pred/chi_clean.csv')
         if city=='New York City':
             data = pd.read_csv('price_pred/nyc_clean.csv')
         if city=='Los Angeles':
