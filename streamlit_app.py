@@ -12,7 +12,7 @@ import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 import base64
-
+from price_pred.prediction import prepare_for_model
 
 # Background image path
 background_image_path = "airbnb.png"
@@ -111,25 +111,36 @@ with tab1:
                                 ('Chicago', 'New York City', 'Los Angeles'))
         
         if city=='Chicago':
-            data = pd.read_csv('price_pred/chi_clean.csv')
+            city_code = 'chi'
         if city=='New York City':
-            data = pd.read_csv('price_pred/nyc_clean.csv')
+            city_code = 'nyc'
         if city=='Los Angeles':
-            data = pd.read_csv('price_pred/la_clean.csv')
+            city_code = 'la'
 
-        accommodates = st.slider('Maximum Capacity', data['accommodates'].min(), data['accommodates'].max(), 4)
-        bathrooms = st.slider('Number of bathrooms', data['bathrooms'].min(), data['bathrooms'].max(), 2)
+        data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
+
+        neighborhood = st.selectbox('Neighborhood',
+                                data['neighbourhood_cleansed'].unique())
+        neighborhood_group = st.selectbox('Neighborhood Group',
+                                data['neighbourhood_group_cleansed'].unique())
+        accommodates = st.slider('Maximum Capacity', data['accommodates'].min(), data['accommodates'].max())
+        bathrooms = st.slider('Number of bathrooms', data['bathrooms'].min(), data['bathrooms'].max())
+        bathroom_type = st.selectbox('Bathroom Type',
+                                data['bathroom_type'].unique())
         room_type = st.selectbox('Room Type',
                                 data['room_type'].unique())
         instant = st.selectbox('Can the listing be instantly booked?',
                             ('No', 'Yes'))
     with col2:
-        beds = st.slider('Number of beds', data['beds'].min(), data['beds'].max(), 2)
-        bedrooms = st.slider('Number of bedrooms', data['bedrooms'].min(), data['bedrooms'].max(), 2)
-        min_nights = st.slider('Minimum number of nights', data['minimum_nights'].min(), data['minimum_nights'].max(), 3)
+        beds = st.slider('Number of beds', data['beds'].min(), data['beds'].max())
+        bedrooms = st.slider('Number of bedrooms', data['bedrooms'].min(), data['bedrooms'].max())
+        min_nights = st.slider('Minimum number of nights', data['minimum_nights'].min(), data['minimum_nights'].max())
+        max_nights = st.slider('Maximum number of nights', data['maximum_nights'].min(), data['maximum_nights'].max())
+        
+        amen_options = list(data.columns[-20:])
         amenities = st.multiselect(
             'Select available amenities',
-            list(data.columns[-20:]),)
+            amen_options,)
             # ['TV', 'Wifi'])
 
     # Section for host info
@@ -138,35 +149,32 @@ with tab1:
 
     col1, col2 = st.columns(2)
     with col1:
-        gender = st.selectbox('Host gender', ('Female', 'Male', 'Other/Corporation'))
         pic = st.selectbox('Does your host have a profile picture?', ('Yes', 'No'))
         dec = st.selectbox('Did your host write a description about the listing?', ('Yes', 'No'))
         super_host = st.selectbox('Is your host a superhost?', ('No', 'Yes'))
     with col2:
         verified = st.selectbox('Is your host verified?', ('Yes', 'No'))
         availability = st.selectbox('Is the listing available?', ('Yes', 'No'))
-        response = st.selectbox('Response rate', (
-            'Within an hour', 'Within a few hours', 'Within a day', 'Within a few days'))
-        no_review = st.selectbox('Did your host get any review?', ('Yes', 'No'))
-
-    host_since = st.slider(
-        'Number of days your host has been using Airbnb',
-        1, 5000, 2000)
+        response_time = st.selectbox('Response time', data['host_response_time'].unique())
+        response_rate = st.slider('Response rate', 0.0, 1.0, step=.1)
+        accept_rate = st.slider('Acceptance rate', 0.0, 1.0, step=.1)
+        num_review = st.slider('Number of reviews', data['number_of_reviews'].min(), data['number_of_reviews'].max())
+        num_listings = st.slider('Number of listings', data['host_listings_count'].min(), data['host_listings_count'].max())
     
     st.markdown('---')
     st.subheader("Guests' feedback")
     
-
     col1, col2, col3 = st.columns(3)
     with col1:
-        location = st.slider('Location rating', 1.0, 5.0, 4.0, step=0.5)
-        checkin = st.slider('Checkin rating', 1.0, 5.0, 3.0, step=0.5)
+        overall = st.slider('Overall rating', 1.0, 5.0, step=0.1)
+        location = st.slider('Location rating', 1.0, 5.0, step=0.1)
+        checkin = st.slider('Checkin rating', 1.0, 5.0, step=0.1)
     with col2:
-        clean = st.slider('Cleanliness rating', 1.0, 5.0, 3.0, step=0.5)
-        communication = st.slider('Communication rating', 1.0, 5.0, 4.0, step=0.5)
+        clean = st.slider('Cleanliness rating', 1.0, 5.0, step=0.1)
+        communication = st.slider('Communication rating', 1.0, 5.0, step=0.1)
     with col3:
-        value = st.slider('Value rating', 1.0, 5.0, 3.5, step=0.5)
-        accuracy = st.slider('Accuracy rating', 1.0, 5.0, 4.2, step=0.5)
+        value = st.slider('Value rating', 1.0, 5.0, step=0.1)
+        accuracy = st.slider('Accuracy rating', 1.0, 5.0, step=0.1)
 
     # Center model prediction button
     _, col2, _ = st.columns(3)
@@ -174,23 +182,10 @@ with tab1:
         run_preds = st.button('Run the model')
         if run_preds:    
             # Load AI model
-            with open('price_pred/xgb_reg.pkl', 'rb') as f:
+            with open(f'price_pred/{city_code}_model.pkl', 'rb') as f:
                 xgb_model = pickle.load(f)
-                
-            # One-hot encoding amenities
-            options = ['TV', 'Wifi', 'Netflix', 'Swimming pool', 'Hot tub', 'Gym', 'Elevator',
-                    'Fridge', 'Heating', 'Air Conditioning', 'Hair dryer', 'BBQ', 'Oven',
-                    'Security cameras', 'Workspace', 'Coffee maker', 'Backyard',
-                    'Outdoor dining', 'Host greeting', 'Beachfront', 'Patio',
-                    'Luggage dropoff', 'Furniture']
 
-            amens = [1 if i in amenities else 0 for i in options]
-            tv, wifi, netflix, pool = amens[0], amens[1], amens[2], amens[3]
-            tub, gym, elevator, fridge = amens[4], amens[5], amens[6], amens[7]
-            heat, air, hair, bbq = amens[8], amens[9], amens[10], amens[11]
-            oven, cams, workspace, coffee = amens[12], amens[13], amens[14], amens[15]
-            backyard, outdoor, greet, beach = amens[16], amens[17], amens[18], amens[19]
-            patio, luggage, furniture = amens[20], amens[21], amens[22]
+            amens = [1 if i in amenities else 0 for i in amen_options]
 
             # One-hot encoding binary features
             dec = 1 if dec == 'Yes' else 0
@@ -199,101 +194,49 @@ with tab1:
             verified = 1 if verified == 'Yes' else 0
             availability = 1 if availability == 'Yes' else 0
             instant = 1 if instant == 'Yes' else 0
-            gender = 1 if gender == 'Yes' else 0
-            no_review = 0 if no_review == 'Yes' else 1
 
-            # Encode room_type feature
-            rooms = {
-                'Private room': 1,
-                'Entire home/apt': 2,
-                'Shared room': 3,
-                'Hotel room': 4
-            }
-            room_type = rooms.get(room_type)
-
-            # Encode response_time feature
-            responses = {
-                'Within an hour': 1,
-                'Within a few hours': 2,
-                'Within a day': 3,
-                'Within a few days': 4
-            }
-            response = responses.get(response)
+            user_input = [dec,
+                        response_time,
+                        accept_rate,
+                        super_host,
+                        num_listings,
+                        pic,
+                        verified,
+                        neighborhood,
+                        neighborhood_group,
+                        room_type,
+                        accommodates,
+                        bathrooms,
+                        bedrooms,
+                        beds,
+                        min_nights,
+                        max_nights,
+                        availability,
+                        num_review,
+                        overall,
+                        accuracy,
+                        clean,
+                        checkin,
+                        communication,
+                        location,
+                        value,
+                        instant,
+                        bathroom_type,
+                        ].extend(amens)
 
             # Set up feature matrix for predictions
-            X_test = pd.DataFrame(data=np.column_stack((
-                dec, 2049.8854, response, 76.6324, 
-                71.2640, super_host, 69.1362, pic, verified,
-                room_type, accommodates, bathrooms, 
-                bedrooms, beds, min_nights, 601.9025,
-                27.1608, 332469.8321, availability,
-                9.7215, 40.2549, 179.5286, 36.1675,
-                9.8272, 0.9183, 827.2542, 238.0988, 
-                4.6789, accuracy, clean, checkin, 
-                communication, location, value,
-                instant, 18.3119, 14.5421, 3.3295,
-                0.3858, 0, 114, 0, 1.1963, 1,
-                -0.3559, -0.7283, 0.5242, 17, 
-                tv, netflix, gym, elevator, fridge,
-                heat, hair, air, tub, oven, bbq, cams, 
-                workspace, coffee, backyard, outdoor, 
-                greet, pool, beach, patio, luggage, furniture,
-                gender, 0.9643, 0.9029, 0.9650, no_review)))
+            X_test = pd.DataFrame(columns=data.columns, 
+                                  data=[user_input])
             
-            # Define the current feature names
-            current_feature_names = ['description', 'host_since', 'host_response_time', 'host_response_rate',
-                'host_acceptance_rate', 'host_is_superhost', 'host_listings_count', 'host_has_profile_pic', 
-                'host_identity_verified', 'room_type', 'accommodates', 'bathrooms', 'bedrooms', 'beds', 
-                'minimum_nights', 'maximum_nights', 'minimum_nights_avg_ntm', 'maximum_nights_avg_ntm', 
-                'has_availability', 'availability_30', 'availability_90', 'availability_365', 'number_of_reviews', 
-                'number_of_reviews_ltm', 'number_of_reviews_l30d', 'first_review', 'last_review', 
-                'review_scores_rating', 'review_scores_accuracy', 'review_scores_cleanliness', 
-                'review_scores_checkin', 'review_scores_communication', 'review_scores_location', 
-                'review_scores_value', 'instant_bookable', 'calculated_host_listings_count', 
-                'calculated_entire', 'calculated_private', 'calculated_shared', 'neighborhood', 
-                'neighborhood_group', 'inactive', 'reviews_month', 'responds', 'geo_x', 'geo_y', 'geo_z', 
-                'property', 'tv', 'netflix', 'gym', 'elevator', 'fridge', 'heating', 'hair_dryer', 
-                'air_conditioning', 'hot_tub', 'oven', 'bbq', 'security cameras', 'workspace', 'coffee', 
-                'backyard', 'outdoor_dining', 'greets', 'pool', 'beachfront', 'patio', 'luggage', 'furniture', 
-                'nlp_gender', 'sent_median', 'sent_mean', 'sent_mode', 'no_review']
-
-            # Desired feature order
-            desired_order = ['neighborhood_group', 'number_of_reviews', 'minimum_nights', 'beds', 'calculated_entire',
-                'host_response_rate', 'number_of_reviews_l30d', 'host_is_superhost', 'heating', 'bedrooms', 
-                'review_scores_accuracy', 'property', 'review_scores_communication', 'host_response_time', 'geo_x', 
-                'number_of_reviews_ltm', 'room_type', 'host_has_profile_pic', 'tv', 'fridge', 'outdoor_dining', 
-                'sent_mode', 'geo_z', 'coffee', 'bathrooms', 'availability_90', 'security cameras', 'inactive', 
-                'maximum_nights_avg_ntm', 'last_review', 'minimum_nights_avg_ntm', 'greets', 'sent_median', 'responds', 
-                'host_listings_count', 'patio', 'availability_30', 'calculated_shared', 'review_scores_rating', 
-                'first_review', 'review_scores_location', 'reviews_month', 'review_scores_checkin', 'instant_bookable', 
-                'host_since', 'hot_tub', 'bbq', 'netflix', 'workspace', 'description', 'pool', 'beachfront', 
-                'luggage', 'nlp_gender', 'no_review', 'geo_y', 'backyard', 'review_scores_value', 'elevator', 
-                'accommodates', 'review_scores_cleanliness', 'air_conditioning', 'availability_365', 'sent_mean', 
-                'host_identity_verified', 'host_acceptance_rate', 'calculated_host_listings_count', 'neighborhood', 
-                'hair_dryer', 'gym', 'oven', 'furniture', 'calculated_private', 'maximum_nights', 'has_availability']
-
-            # Create the test input array (example data)
-            data = np.column_stack((
-                dec, 2049.8854, response, 76.6324, 71.2640, super_host, 69.1362, pic, verified, room_type, 
-                accommodates, bathrooms, bedrooms, beds, min_nights, 601.9025, 27.1608, 332469.8321, 
-                availability, 9.7215, 40.2549, 179.5286, 36.1675, 9.8272, 0.9183, 827.2542, 238.0988, 4.6789, 
-                accuracy, clean, checkin, communication, location, value, instant, 18.3119, 14.5421, 3.3295, 
-                0.3858, 0, 114, 0, 1.1963, 1, -0.3559, -0.7283, 0.5242, 17, tv, netflix, gym, elevator, 
-                fridge, heat, hair, air, tub, oven, bbq, cams, workspace, coffee, backyard, outdoor, greet, 
-                pool, beach, patio, luggage, furniture, gender, 0.9643, 0.9029, 0.9650, no_review))
-            
-            
-
-            # Create DataFrame
-            X_test = pd.DataFrame(data=data, columns=current_feature_names)
+            # Prepare for model
+            X_test = prepare_for_model(X_test)
 
             # Reorder the DataFrame columns to match the desired order
-            X_test_reordered = X_test[desired_order]
             predicted_price = exp(xgb_model.predict(X_test))
-            X_test_reordered.loc[:, 'predicted_price'] = predicted_price
+            X_test.loc[:, 'predicted_price'] = predicted_price
             
             st.info(f"Predicted price is ${round(predicted_price, 2)}")
-            st.session_state['X_test_reordered'] = X_test_reordered
+            st.session_state['X_test'] = X_test
 
 
 # Generate or load a large sample dataset
