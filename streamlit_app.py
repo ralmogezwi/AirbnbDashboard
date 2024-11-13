@@ -123,8 +123,8 @@ with tab1:
                                 data['neighbourhood_cleansed'].unique())
         neighborhood_group = st.selectbox('Neighborhood Group',
                                 data['neighbourhood_group_cleansed'].unique())
-        accommodates = st.slider('Maximum Capacity', data['accommodates'].min(), data['accommodates'].max())
-        bathrooms = st.slider('Number of bathrooms', data['bathrooms'].min(), data['bathrooms'].max())
+        accommodates = st.slider('Maximum Capacity', int(data['accommodates'].min()), int(data['accommodates'].max()))
+        bathrooms = st.slider('Number of bathrooms', float(data['bathrooms'].min()), float(data['bathrooms'].max()))
         bathroom_type = st.selectbox('Bathroom Type',
                                 data['bathroom_type'].unique())
         room_type = st.selectbox('Room Type',
@@ -132,10 +132,10 @@ with tab1:
         instant = st.selectbox('Can the listing be instantly booked?',
                             ('No', 'Yes'))
     with col2:
-        beds = st.slider('Number of beds', data['beds'].min(), data['beds'].max())
-        bedrooms = st.slider('Number of bedrooms', data['bedrooms'].min(), data['bedrooms'].max())
-        min_nights = st.slider('Minimum number of nights', data['minimum_nights'].min(), data['minimum_nights'].max())
-        max_nights = st.slider('Maximum number of nights', data['maximum_nights'].min(), data['maximum_nights'].max())
+        beds = st.slider('Number of beds', int(data['beds'].min()), int(data['beds'].max()))
+        bedrooms = st.slider('Number of bedrooms', int(data['bedrooms'].min()), int(data['bedrooms'].max()))
+        min_nights = st.slider('Minimum number of nights', int(data['minimum_nights'].min()), int(data['minimum_nights'].max()))
+        max_nights = st.slider('Maximum number of nights', int(data['maximum_nights'].min()), int(data['maximum_nights'].max()))
         
         amen_options = list(data.columns[-20:])
         amenities = st.multiselect(
@@ -158,8 +158,8 @@ with tab1:
         response_time = st.selectbox('Response time', data['host_response_time'].unique())
         response_rate = st.slider('Response rate', 0.0, 1.0, step=.1)
         accept_rate = st.slider('Acceptance rate', 0.0, 1.0, step=.1)
-        num_review = st.slider('Number of reviews', data['number_of_reviews'].min(), data['number_of_reviews'].max())
-        num_listings = st.slider('Number of listings', data['host_listings_count'].min(), data['host_listings_count'].max())
+        num_review = st.slider('Number of reviews', int(data['number_of_reviews'].min()), int(data['number_of_reviews'].max()))
+        num_listings = st.slider('Number of listings', int(data['host_listings_count'].min()), int(data['host_listings_count'].max()))
     
     st.markdown('---')
     st.subheader("Guests' feedback")
