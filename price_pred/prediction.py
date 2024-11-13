@@ -10,10 +10,8 @@ from scipy.sparse import csr_matrix
 import numpy as np
 
 
-def prepare_for_model(df, ft_red_method=None):
-    
-    X, y = df.drop(columns=['price']), df[['price']]
-    
+def prepare_for_model(X, ft_red_method=None):
+        
     # Identify string columns
     string_columns = X.select_dtypes(include=['object']).columns
 
@@ -28,9 +26,9 @@ def prepare_for_model(df, ft_red_method=None):
 
     # Feature reduction
     if ft_red_method:
-        X_dummies = feature_reduction(X_dummies, y, ft_red_method)
+        X_dummies = feature_reduction(X_dummies, ft_red_method)
 
-    return X_dummies, y
+    return X_dummies
 
 
 
@@ -99,26 +97,11 @@ def run_xgboost_regression(X, y, test_size=0.2, random_state=42):
     return model, y_pred
 
 
+for city_code in ['nyc','la','chi']:
+    data = pd.read_csv(f'{city_code}_clean.csv')
+    X, y = data.drop(columns=['price']), data[['price']]
+    X = prepare_for_model(data, None)
+    model, y_pred = run_xgboost_regression(X, y)
 
-data = pd.read_csv('nyc_clean.csv')
-X, y = prepare_for_model(data, None)
-model, y_pred = run_xgboost_regression(X, y)
-
-with open('nyc_model.pkl', 'wb') as f:
-    pickle.dump(model, f)
-
-
-data = pd.read_csv('la_clean.csv')
-X, y = prepare_for_model(data, None)
-model, y_pred = run_xgboost_regression(X, y)
-
-with open('la_model.pkl', 'wb') as f:
-    pickle.dump(model, f)
-
-
-data = pd.read_csv('chi_clean.csv')
-X, y = prepare_for_model(data, None)
-model, y_pred = run_xgboost_regression(X, y)
-
-with open('chi_model.pkl', 'wb') as f:
-    pickle.dump(model, f)
+    with open(f'{city_code}_model.pkl', 'wb') as f:
+        pickle.dump(model, f)

@@ -8,7 +8,7 @@ def clean_data(df):
     data = df[[
         # 'host_since',
         'description',
-        'host_location',
+        # 'host_location',
         'host_response_time', 'host_response_rate', 'host_acceptance_rate',
         'host_is_superhost',
         # 'host_neighbourhood',
@@ -17,7 +17,8 @@ def clean_data(df):
         'host_has_profile_pic', 'host_identity_verified',
         'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
         # 'latitude', 'longitude',
-        'property_type', 'room_type', 'accommodates', 'bathrooms',
+        # 'property_type',
+        'room_type', 'accommodates', 'bathrooms',
         'bathrooms_text', 'bedrooms', 'beds', 'amenities',
         'minimum_nights', 'maximum_nights',
         # 'minimum_minimum_nights', 'maximum_minimum_nights', 'minimum_maximum_nights',
@@ -33,7 +34,7 @@ def clean_data(df):
         'review_scores_value', 'instant_bookable',
         # 'calculated_host_listings_count',
         # 'calculated_host_listings_count_entire_homes', 'calculated_host_listings_count_private_rooms', 'calculated_host_listings_count_shared_rooms',
-        'reviews_per_month',
+        # 'reviews_per_month',
         'price']]
 
     # Convert percentages to numbers
