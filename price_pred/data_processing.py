@@ -97,7 +97,7 @@ nyc_clean = clean_data(nyc_listings)
 la_clean = clean_data(la_listings)
 chi_clean = clean_data(chi_listings)
 
-nyc_clean.to_csv('nyc_clean.csv', index=False)
-la_clean.to_csv('la_clean.csv', index=False)
-chi_clean.to_csv('chi_clean.csv', index=False)
+nyc_clean.to_csv('price_pred/nyc_clean.csv', index=False)
+la_clean.to_csv('price_pred/la_clean.csv', index=False)
+chi_clean.to_csv('price_pred/chi_clean.csv', index=False)
 

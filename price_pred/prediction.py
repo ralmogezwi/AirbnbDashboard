@@ -98,7 +98,7 @@ def run_xgboost_regression(X, y, test_size=0.2, random_state=42):
 
 
 for city_code in ['nyc','la','chi']:
-    data = pd.read_csv(f'{city_code}_clean.csv')
+    data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
     X, y = data.drop(columns=['price']), data[['price']]
     X = prepare_for_model(data, None)
     model, y_pred = run_xgboost_regression(X, y)
