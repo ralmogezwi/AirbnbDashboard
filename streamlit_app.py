@@ -13,6 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import base64
 from price_pred.prediction import prepare_for_model
+import random
 
 # Background image path
 background_image_path = "airbnb.png"
@@ -119,29 +120,30 @@ with tab1:
 
         data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
 
-        neighborhood = st.selectbox('Neighborhood',
-                                data['neighbourhood_cleansed'].unique())
-        neighborhood_group = st.selectbox('Neighborhood Group',
-                                data['neighbourhood_group_cleansed'].unique())
-        accommodates = st.slider('Maximum Capacity', int(data['accommodates'].min()), int(data['accommodates'].max()))
-        bathrooms = st.slider('Number of bathrooms', float(data['bathrooms'].min()), float(data['bathrooms'].max()))
+        # neighborhood = st.selectbox('Neighborhood',
+        #                         data['neighbourhood_cleansed'].unique())
+        # neighborhood_group = st.selectbox('Neighborhood Group',
+        #                         data['neighbourhood_group_cleansed'].unique())
+        accommodates = st.slider('Maximum Capacity', int(data['accommodates'].min()), int(data['accommodates'].max()), int(data['accommodates'].median()))
+        bathrooms = st.slider('Number of bathrooms', float(data['bathrooms'].min()), float(data['bathrooms'].max()), float(data['bathrooms'].median()), step=.5)
         bathroom_type = st.selectbox('Bathroom Type',
                                 data['bathroom_type'].unique())
         room_type = st.selectbox('Room Type',
                                 data['room_type'].unique())
         instant = st.selectbox('Can the listing be instantly booked?',
-                            ('No', 'Yes'))
+                            ('Yes', 'No'))
     with col2:
-        beds = st.slider('Number of beds', int(data['beds'].min()), int(data['beds'].max()))
-        bedrooms = st.slider('Number of bedrooms', int(data['bedrooms'].min()), int(data['bedrooms'].max()))
-        min_nights = st.slider('Minimum number of nights', int(data['minimum_nights'].min()), int(data['minimum_nights'].max()))
-        max_nights = st.slider('Maximum number of nights', int(data['maximum_nights'].min()), int(data['maximum_nights'].max()))
+        beds = st.slider('Number of beds', int(data['beds'].min()), int(data['beds'].max()), int(data['beds'].median()))
+        bedrooms = st.slider('Number of bedrooms', int(data['bedrooms'].min()), int(data['bedrooms'].max()), int(data['bedrooms'].median()))
+        min_nights = st.slider('Minimum number of nights', int(data['minimum_nights'].min()), int(data['minimum_nights'].max()), int(data['minimum_nights'].median()))
+        max_nights = st.slider('Maximum number of nights', int(data['maximum_nights'].min()), int(data['maximum_nights'].max()), int(data['minimum_nights'].median()))
         
         amen_options = list(data.columns[-20:])
         amenities = st.multiselect(
             'Select available amenities',
-            amen_options,)
-            # ['TV', 'Wifi'])
+            amen_options,
+            # random.sample(amen_options, 5)
+            )
 
     # Section for host info
     st.markdown('---')
@@ -152,29 +154,29 @@ with tab1:
         pic = st.selectbox('Does your host have a profile picture?', ('Yes', 'No'))
         dec = st.selectbox('Did your host write a description about the listing?', ('Yes', 'No'))
         super_host = st.selectbox('Is your host a superhost?', ('No', 'Yes'))
+        response_rate = st.slider('Response rate', 0.0, 1.0, .8, step=.1)
+        accept_rate = st.slider('Acceptance rate', 0.0, 1.0, .8, step=.1)
     with col2:
         verified = st.selectbox('Is your host verified?', ('Yes', 'No'))
         availability = st.selectbox('Is the listing available?', ('Yes', 'No'))
         response_time = st.selectbox('Response time', data['host_response_time'].unique())
-        response_rate = st.slider('Response rate', 0.0, 1.0, step=.1)
-        accept_rate = st.slider('Acceptance rate', 0.0, 1.0, step=.1)
-        num_review = st.slider('Number of reviews', int(data['number_of_reviews'].min()), int(data['number_of_reviews'].max()))
-        num_listings = st.slider('Number of listings', int(data['host_listings_count'].min()), int(data['host_listings_count'].max()))
+        num_review = st.slider('Number of reviews', int(data['number_of_reviews'].min()), int(data['number_of_reviews'].max()), int(data['number_of_reviews'].median()))
+        num_listings = st.slider('Number of listings', int(data['host_listings_count'].min()), int(data['host_listings_count'].max()), int(data['host_listings_count'].median()))
     
     st.markdown('---')
     st.subheader("Guests' feedback")
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        overall = st.slider('Overall rating', 1.0, 5.0, step=0.1)
-        location = st.slider('Location rating', 1.0, 5.0, step=0.1)
-        checkin = st.slider('Checkin rating', 1.0, 5.0, step=0.1)
+        overall = st.slider('Overall rating', 1.0, 5.0, 3.0, step=0.1)
+        location = st.slider('Location rating', 1.0, 5.0, 3.0, step=0.1)
+        checkin = st.slider('Checkin rating', 1.0, 5.0, 3.0, step=0.1)
     with col2:
-        clean = st.slider('Cleanliness rating', 1.0, 5.0, step=0.1)
-        communication = st.slider('Communication rating', 1.0, 5.0, step=0.1)
+        clean = st.slider('Cleanliness rating', 1.0, 5.0, 3.0, step=0.1)
+        communication = st.slider('Communication rating', 1.0, 5.0, 3.0, step=0.1)
     with col3:
-        value = st.slider('Value rating', 1.0, 5.0, step=0.1)
-        accuracy = st.slider('Accuracy rating', 1.0, 5.0, step=0.1)
+        value = st.slider('Value rating', 1.0, 5.0, 3.0, step=0.1)
+        accuracy = st.slider('Accuracy rating', 1.0, 5.0, 3.0, step=0.1)
 
     # Center model prediction button
     _, col2, _ = st.columns(3)
@@ -195,15 +197,20 @@ with tab1:
             availability = 1 if availability == 'Yes' else 0
             instant = 1 if instant == 'Yes' else 0
 
-            user_input = [dec,
+            X_cols = data.columns[data.columns != "price"]
+            # st.info(len(amens))
+
+            X_test = pd.DataFrame(columns=X_cols, data=[[
+                        dec,
                         response_time,
+                        response_rate,
                         accept_rate,
                         super_host,
                         num_listings,
                         pic,
                         verified,
-                        neighborhood,
-                        neighborhood_group,
+                        # neighborhood,
+                        # neighborhood_group,
                         room_type,
                         accommodates,
                         bathrooms,
@@ -222,21 +229,19 @@ with tab1:
                         value,
                         instant,
                         bathroom_type,
-                        ].extend(amens)
-
-            # Set up feature matrix for predictions
-            X_test = pd.DataFrame(columns=data.columns, 
-                                  data=[user_input])
+                        ] + amens])
             
             # Prepare for model
             X_test = prepare_for_model(X_test)
 
-            # Reorder the DataFrame columns to match the desired order
-            predicted_price = exp(xgb_model.predict(X_test))
-            X_test.loc[:, 'predicted_price'] = predicted_price
-            
-            st.info(f"Predicted price is ${round(predicted_price, 2)}")
-            st.session_state['X_test'] = X_test
+            # Ensure X_test has exactly the same columns as the model's feature names
+            expected_features = xgb_model.get_booster().feature_names  # Extract expected features from model
+
+            # Align columns in X_test with the expected features
+            X_test = X_test.reindex(columns=expected_features)
+
+            # Get predicted price
+            st.info(f"Predicted price is ${round(exp(xgb_model.predict(X_test)), 2)}")
 
 
 # Generate or load a large sample dataset

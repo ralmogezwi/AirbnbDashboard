@@ -15,7 +15,7 @@ def clean_data(df):
         'host_listings_count',
         # 'host_total_listings_count',
         'host_has_profile_pic', 'host_identity_verified',
-        'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
+        # 'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
         # 'latitude', 'longitude',
         # 'property_type',
         'room_type', 'accommodates', 'bathrooms',
@@ -89,9 +89,9 @@ def clean_data(df):
 
 
 
-nyc_listings = pd.read_csv('data/nyc_listings.csv')
-la_listings = pd.read_csv('data/la_listings.csv')
-chi_listings = pd.read_csv('data/chi_listings.csv')
+nyc_listings = pd.read_csv('price_pred/data/nyc_listings.csv')
+la_listings = pd.read_csv('price_pred/data/la_listings.csv')
+chi_listings = pd.read_csv('price_pred/data/chi_listings.csv')
 
 nyc_clean = clean_data(nyc_listings)
 la_clean = clean_data(la_listings)
