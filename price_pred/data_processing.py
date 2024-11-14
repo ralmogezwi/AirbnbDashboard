@@ -84,6 +84,12 @@ def clean_data(df):
 
     # Filter rows where 'price' is not NaN
     data = data[data['price'].notna()]
+
+    # Remove columns where more than 50% of the values are NaN
+    data = data.dropna(axis=1, thresh=data.shape[0] * 0.5)
+
+    # Remove rows where more than 50% of the values are NaN
+    data = data.dropna(axis=0, thresh=data.shape[1] * 0.5)
     
     return data
 

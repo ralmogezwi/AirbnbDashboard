@@ -126,8 +126,8 @@ with tab1:
         #                         data['neighbourhood_group_cleansed'].unique())
         accommodates = st.slider('Maximum Capacity', int(data['accommodates'].min()), int(data['accommodates'].max()), int(data['accommodates'].median()))
         bathrooms = st.slider('Number of bathrooms', float(data['bathrooms'].min()), float(data['bathrooms'].max()), float(data['bathrooms'].median()), step=.5)
-        bathroom_type = st.selectbox('Bathroom Type',
-                                data['bathroom_type'].unique())
+        # bathroom_type = st.selectbox('Bathroom Type',
+        #                         data['bathroom_type'].unique())
         room_type = st.selectbox('Room Type',
                                 data['room_type'].unique())
         instant = st.selectbox('Can the listing be instantly booked?',
@@ -228,7 +228,7 @@ with tab1:
                         location,
                         value,
                         instant,
-                        bathroom_type,
+                        # bathroom_type,
                         ] + amens])
             
             # Prepare for model

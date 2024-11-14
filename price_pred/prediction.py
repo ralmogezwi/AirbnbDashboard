@@ -8,6 +8,8 @@ from sklearn.impute import KNNImputer
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
 import numpy as np
+from sklearn.impute import KNNImputer
+
 
 
 def prepare_for_model(X, ft_red_method=None):
@@ -18,16 +20,29 @@ def prepare_for_model(X, ft_red_method=None):
     # Get dummy variables for all string columns
     X_dummies = pd.get_dummies(X, columns=string_columns, drop_first=True)
 
+    # if X_dummies.shape[0]==1:
+    #     return X_dummies
+
     # print(X_dummies.shape)
     # print(X_dummies.dtypes)
     
     # Replace NaNs with a specified value (e.g., column mean or zero)
     X_dummies.fillna(X_dummies.median(), inplace=True)  # Replace NaN with column median
 
+    # # Initialize the KNN imputer
+    # knn_imputer = KNNImputer(n_neighbors=5)
+
+    # # Apply KNN imputation
+    # X_dummies_imputed = knn_imputer.fit_transform(X_dummies)
+
+    # # Convert the result back to a DataFrame
+    # X_dummies_imputed_df = pd.DataFrame(X_dummies_imputed, columns=X_dummies.columns)
+
     # Feature reduction
     if ft_red_method:
         X_dummies = feature_reduction(X_dummies, ft_red_method)
 
+    # return X_dummies_imputed_df
     return X_dummies
 
 
@@ -101,7 +116,7 @@ for city_code in ['nyc','la','chi']:
     data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
     X, y = data.drop(columns=['price']), data[['price']]
     X = prepare_for_model(X, None)
-    print(X.columns)
+    # print(X.columns)
     model, y_pred = run_xgboost_regression(X, y)
 
     with open(f'price_pred/{city_code}_model.pkl', 'wb') as f:
