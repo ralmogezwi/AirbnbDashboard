@@ -1,0 +1,1 @@
+streamlit run c:/Users/ethan/OneDrive/Documents/psu/ds440/AirbnbDashboard/streamlit_app.py

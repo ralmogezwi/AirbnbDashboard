@@ -241,7 +241,7 @@ with tab1:
             X_test = X_test.reindex(columns=expected_features)
 
             # Get predicted price
-            st.info(f"Predicted price is ${round(exp(xgb_model.predict(X_test)), 2)}")
+            st.info(f"Predicted price is ${round(float(xgb_model.predict(X_test)[0]), 2)}")
 
 
 # Generate or load a large sample dataset
@@ -348,15 +348,42 @@ relevant_features = [
 
 # Correlation Visualization in Tab 2
 with tab2:
-    st.subheader("Feature Correlation with Predicted Price")
+    vis_city = st.selectbox('City',
+                            ('Chicago', 'New York City', 'Los Angeles'), key='vis')
+    
+    if vis_city=='Chicago':
+        vis_city_code = 'chi'
+    if vis_city=='New York City':
+        vis_city_code = 'nyc'
+    if vis_city=='Los Angeles':
+        vis_city_code = 'la'
+
+    vis_data = pd.read_csv(f'price_pred/{vis_city_code}_clean.csv')
+    
+    # Save in session state
+    st.session_state['vis_data'] = vis_data
+    
+    st.subheader("Feature Correlation with Price")
 
     # Check if prediction data is available
-    if 'X_test_reordered' in st.session_state:
-        X_test_reordered = st.session_state['X_test_reordered']
+    if 'vis_data' in st.session_state:
+        
+        vis_data = st.session_state['vis_data']
+        data_quant = vis_data.drop(columns=['room_type', 'host_response_time'])
+        from scipy.stats import zscore
 
-        # Filter to include only relevant features and the predicted price
-        filtered_data = X_test_reordered[relevant_features + ['predicted_price']]
-        correlations = filtered_data.corr()['predicted_price'].sort_values(ascending=False)
+        # Calculate the Z-score for the 'price' column
+        data_quant['z_score'] = zscore(data_quant['price'])
+
+        # Filter the DataFrame to remove rows where the Z-score is greater than 3 or less than -3
+        data_filtered = data_quant[(data_quant['z_score'].abs() <= 3)]
+
+        # Optionally, drop the Z-score column after filtering
+        data_quant_filtered = data_filtered.drop(columns=['z_score'])
+
+        # # Filter to include only relevant features and the predicted price
+        # filtered_data = X_test_reordered[relevant_features + ['predicted_price']]
+        correlations = data_quant_filtered.corr()['price'].sort_values(ascending=False)
         
         # Select top features with highest correlation
         num_features = st.slider("Select number of top correlated features", 5, len(correlations)-1, 10)
@@ -373,7 +400,7 @@ with tab2:
         ))
 
         fig.update_layout(
-            title="Top Correlated Features with Predicted Price",
+            title="Top Correlated Features with Price",
             xaxis_title="Correlation Coefficient",
             yaxis_title="Features",
             yaxis=dict(autorange="reversed"),
@@ -381,22 +408,20 @@ with tab2:
         )
 
         st.plotly_chart(fig, use_container_width=True)
-
-    if 'X_test_reordered' in st.session_state:
-        X_test_reordered = st.session_state['X_test_reordered']
+        
         st.markdown('---')
         st.subheader("Price vs. Key Feature Plot")
         
 
         feature = st.selectbox(
         "Select a feature to compare with predicted price:",
-        options=[col for col in filtered_data.columns if col != "predicted_price"]
+        options=[col for col in data_quant_filtered.columns if col != "price"]
     )
 
         # Plot with Plotly
-        fig = px.scatter(filtered_data, x=feature, y="predicted_price", trendline="ols",
-                        title=f"Predicted Price vs {feature.capitalize()}",
-                        labels={"predicted_price": "Predicted Price", feature: feature.capitalize()})
+        fig = px.scatter(data_quant_filtered, x=feature, y="price", trendline="ols",
+                        title=f"Price vs {feature.capitalize()}",
+                        labels={"price": "Price", feature: feature.capitalize()})
 
         fig.update_layout(width=800, height=600)
         st.plotly_chart(fig)
