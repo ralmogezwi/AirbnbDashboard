@@ -12,8 +12,10 @@ import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 import base64
-from price_pred.prediction import prepare_for_model
+from price_pred.prediction2 import prepare_for_model
 import random
+from sklearn.preprocessing import MinMaxScaler
+
 
 # Background image path
 background_image_path = "airbnb.png"
@@ -118,7 +120,7 @@ with tab1:
         if city=='Los Angeles':
             city_code = 'la'
 
-        data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
+        data = pd.read_csv(f'price_pred/{city_code}_clean2.csv')
 
         # neighborhood = st.selectbox('Neighborhood',
         #                         data['neighbourhood_cleansed'].unique())
@@ -184,7 +186,7 @@ with tab1:
         run_preds = st.button('Run the model')
         if run_preds:    
             # Load AI model
-            with open(f'price_pred/{city_code}_model.pkl', 'rb') as f:
+            with open(f'price_pred/{city_code}_model2.pkl', 'rb') as f:
                 xgb_model = pickle.load(f)
 
             amens = [1 if i in amenities else 0 for i in amen_options]
@@ -231,17 +233,25 @@ with tab1:
                         # bathroom_type,
                         ] + amens])
             
+            with open(f'price_pred/{city_code}_scaler.pkl', 'rb') as f:
+                scaler = pickle.load(f)
             # Prepare for model
-            X_test = prepare_for_model(X_test)
+            X_test = prepare_for_model(X_test, scaler=scaler)
 
             # Ensure X_test has exactly the same columns as the model's feature names
             expected_features = xgb_model.get_booster().feature_names  # Extract expected features from model
 
             # Align columns in X_test with the expected features
-            X_test = X_test.reindex(columns=expected_features)
+            X_test = X_test.reindex(columns=expected_features, fill_value=0)
 
-            # Get predicted price
-            st.info(f"Predicted price is ${round(exp(xgb_model.predict(X_test)), 2)}")
+
+            print("X_test columns:", X_test.columns)
+            print("Expected features:", expected_features)
+
+            # Predict price
+            raw_pred = xgb_model.predict(X_test) * 100
+            #predicted_price = np.expm1(raw_pred)  # Apply inverse log transformation if the target was log-transformed
+            st.info(f"Predicted price is ${round(raw_pred[0], 2)}")
 
 
 # Generate or load a large sample dataset
@@ -400,6 +410,141 @@ with tab2:
 
         fig.update_layout(width=800, height=600)
         st.plotly_chart(fig)
+
+with tab3:
+    st.subheader('Suggestions for Improving Your Listing')
+    st.subheader("Input Your Listing Details")
+    col1, col2 = st.columns(2)
+    with col1:
+        city = st.selectbox('City', 
+                            ('Washington, D.C.', 'New York City', 'Los Angeles'), 
+                            key="key_city_selector")
+        
+        if city == 'Chicago':
+            city_code = 'chi'
+        if city == 'New York City':
+            city_code = 'nyc'
+        if city == 'Los Angeles':
+            city_code = 'la'
+
+        data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
+        accommodates = st.slider('Maximum Capacity', 
+                                  int(data['accommodates'].min()), 
+                                  int(data['accommodates'].max()), 
+                                  int(data['accommodates'].median()), 
+                                  key="key_accommodates_slider")
+        bathrooms = st.slider('Number of bathrooms', 
+                               float(data['bathrooms'].min()), 
+                               float(data['bathrooms'].max()), 
+                               float(data['bathrooms'].median()), 
+                               step=.5, key="key_bathrooms_slider")
+        room_type = st.selectbox('Room Type',
+                                 data['room_type'].unique(),
+                                 key="key_room_type_selector")
+        instant = st.selectbox('Can the listing be instantly booked?',
+                               ('Yes', 'No'), 
+                               key="key_instant_selector")
+    with col2:
+        beds = st.slider('Number of beds', 
+                         int(data['beds'].min()), 
+                         int(data['beds'].max()), 
+                         int(data['beds'].median()), 
+                         key="key_beds_slider")
+        bedrooms = st.slider('Number of bedrooms', 
+                              int(data['bedrooms'].min()), 
+                              int(data['bedrooms'].max()), 
+                              int(data['bedrooms'].median()), 
+                              key="key_bedrooms_slider")
+        min_nights = st.slider('Minimum number of nights', 
+                               int(data['minimum_nights'].min()), 
+                               int(data['minimum_nights'].max()), 
+                               int(data['minimum_nights'].median()), 
+                               key="key_min_nights_slider")
+        max_nights = st.slider('Maximum number of nights', 
+                               int(data['maximum_nights'].min()), 
+                               int(data['maximum_nights'].max()), 
+                               int(data['minimum_nights'].median()), 
+                               key="key_max_nights_slider")
+        
+        amen_options = list(data.columns[-20:])
+        amenities = st.multiselect(
+            'Select available amenities',
+            amen_options,
+            key="key_amenities_multiselect"
+        )
+
+    # Section for host info
+    st.markdown('---')
+    st.subheader('Host Information')
+
+    col1, col2 = st.columns(2)
+    with col1:
+        pic = st.selectbox('Does your host have a profile picture?', 
+                           ('Yes', 'No'), 
+                           key="key_pic_selector")
+        dec = st.selectbox('Did your host write a description about the listing?', 
+                           ('Yes', 'No'), 
+                           key="key_dec_selector")
+        super_host = st.selectbox('Is your host a superhost?', 
+                                  ('No', 'Yes'), 
+                                  key="key_super_host_selector")
+        response_rate = st.slider('Response rate', 
+                                  0.0, 1.0, .8, step=.1, 
+                                  key="key_response_rate_slider")
+        accept_rate = st.slider('Acceptance rate', 
+                                0.0, 1.0, .8, step=.1, 
+                                key="key_accept_rate_slider")
+    with col2:
+        verified = st.selectbox('Is your host verified?', 
+                                ('Yes', 'No'), 
+                                key="key_verified_selector")
+        availability = st.selectbox('Is the listing available?', 
+                                    ('Yes', 'No'), 
+                                    key="key_availability_selector")
+        response_time = st.selectbox('Response time', 
+                                     data['host_response_time'].unique(), 
+                                     key="key_response_time_selector")
+        num_review = st.slider('Number of reviews', 
+                               int(data['number_of_reviews'].min()), 
+                               int(data['number_of_reviews'].max()), 
+                               int(data['number_of_reviews'].median()), 
+                               key="key_num_review_slider")
+        num_listings = st.slider('Number of listings', 
+                                 int(data['host_listings_count'].min()), 
+                                 int(data['host_listings_count'].max()), 
+                                 int(data['host_listings_count'].median()), 
+                                 key="key_num_listings_slider")
+    
+    st.markdown('---')
+    st.subheader("Guests' feedback")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        overall = st.slider('Overall rating', 
+                            1.0, 5.0, 3.0, step=0.1, 
+                            key="key_overall_rating_slider")
+        location = st.slider('Location rating', 
+                             1.0, 5.0, 3.0, step=0.1, 
+                             key="key_location_rating_slider")
+        checkin = st.slider('Checkin rating', 
+                            1.0, 5.0, 3.0, step=0.1, 
+                            key="key_checkin_rating_slider")
+    with col2:
+        clean = st.slider('Cleanliness rating', 
+                          1.0, 5.0, 3.0, step=0.1, 
+                          key="key_clean_rating_slider")
+        communication = st.slider('Communication rating', 
+                                  1.0, 5.0, 3.0, step=0.1, 
+                                  key="key_communication_rating_slider")
+    with col3:
+        value = st.slider('Value rating', 
+                          1.0, 5.0, 3.0, step=0.1, 
+                          key="key_value_rating_slider")
+        accuracy = st.slider('Accuracy rating', 
+                             1.0, 5.0, 3.0, step=0.1, 
+                             key="key_accuracy_rating_slider")
+        
+    desired_price = st.number_input('Enter Your Desired Price', min_value=50, max_value=3000, value=200)
 
 
 

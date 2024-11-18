@@ -113,11 +113,11 @@ def run_xgboost_regression(X, y, test_size=0.2, random_state=42):
 
 
 for city_code in ['nyc','la','chi']:
-    data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
+    data = pd.read_csv(f'price_pred/{city_code}_clean2.csv')
     X, y = data.drop(columns=['price']), data[['price']]
     X = prepare_for_model(X, None)
     # print(X.columns)
     model, y_pred = run_xgboost_regression(X, y)
 
-    with open(f'price_pred/{city_code}_model.pkl', 'wb') as f:
+    with open(f'price_pred/{city_code}_model2.pkl', 'wb') as f:
         pickle.dump(model, f)

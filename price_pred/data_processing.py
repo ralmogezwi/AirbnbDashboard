@@ -85,11 +85,30 @@ def clean_data(df):
     # Filter rows where 'price' is not NaN
     data = data[data['price'].notna()]
 
+    # Handle number_of_reviews = 0
+    zero_review_mask = data['number_of_reviews'] == 0
+    review_columns = [
+        'review_scores_rating', 'review_scores_accuracy', 'review_scores_cleanliness', 
+        'review_scores_checkin', 'review_scores_communication', 'review_scores_location', 
+        'review_scores_value'
+    ]
+    data.loc[zero_review_mask, review_columns] = 0
+
+    # Handle empty values in host_response_time, host_response_rate, host_acceptance_rate, host_is_superhost
+    fill_lowest_columns = ['host_response_time', 'host_response_rate', 'host_acceptance_rate', 'host_is_superhost']
+    for col in fill_lowest_columns:
+        if data[col].dtype == 'object':
+            data[col].fillna(data[col].value_counts().idxmin(), inplace=True)
+        else:
+            data[col].fillna(data[col].min(), inplace=True)
+
     # Remove columns where more than 50% of the values are NaN
     data = data.dropna(axis=1, thresh=data.shape[0] * 0.5)
 
     # Remove rows where more than 50% of the values are NaN
     data = data.dropna(axis=0, thresh=data.shape[1] * 0.5)
+
+
     
     return data
 
