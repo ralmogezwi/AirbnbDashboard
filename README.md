@@ -8,8 +8,11 @@ Two datasets for the three cities are retrieved from [Inside Airbnb](http://insi
 
 ## Features
 🏠 Price Prediction: Predict the price of your listing based on its features using advanced XGBoost models.
+
 📊 Dynamic Suggestions: Get actionable tips to enhance your listing and attract more guests.
+
 🔍 Data Insights: Visualize key correlations and trends with intuitive graphs.
+
 🌐 User-Friendly Interface: Seamlessly explore and interact with the app, designed with simplicity and functionality in mind.
 
 ### How to run it on your own machine
