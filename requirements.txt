@@ -12,3 +12,5 @@ plotly==5.15.0
 hyperopt==0.2.7
 tornado==6.4.1
 seaborn==0.12.2
+statsmodels==0.14.0
+
