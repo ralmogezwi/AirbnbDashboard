@@ -1,4 +1,4 @@
-# Airbnb Price Prediction
+#🏠 Airbnb Price Prediction Dashboard
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://airbnbdash.streamlit.app/)
 
