@@ -15,6 +15,9 @@ import base64
 from price_pred.prediction import prepare_for_model
 import random
 
+
+
+
 # Background image path
 background_image_path = "airbnb.png"
 with open(background_image_path, "rb") as image_file:
@@ -426,6 +429,250 @@ with tab2:
         fig.update_layout(width=800, height=600)
         st.plotly_chart(fig)
 
+with tab3:
+    st.header("Suggestions for Improving Your Listing")
+    # Collect listing details from the user
+    st.subheader("Input Your Listing Details")
+    col1, col2 = st.columns(2)
+    with col1:
+        city = st.selectbox('City',
+                            ('Chicago', 'New York City', 'Los Angeles'),
+                            key="city_selector")
+
+        if city == 'Chicago':
+            city_code = 'chi'
+        if city == 'New York City':
+            city_code = 'nyc'
+        if city == 'Los Angeles':
+            city_code = 'la'
+
+        data = pd.read_csv(f'price_pred/{city_code}_clean.csv')
+
+        accommodates = st.slider('Maximum Capacity', 
+                                  int(data['accommodates'].min()), 
+                                  int(data['accommodates'].max()), 
+                                  int(data['accommodates'].median()),
+                                  key="accommodates_slider")
+        bathrooms = st.slider('Number of bathrooms', 
+                               float(data['bathrooms'].min()), 
+                               float(data['bathrooms'].max()), 
+                               float(data['bathrooms'].median()), 
+                               step=.5,
+                               key="bathrooms_slider")
+        room_type = st.selectbox('Room Type',
+                                 data['room_type'].unique(),
+                                 key="room_type_selector")
+        instant = st.selectbox('Can the listing be instantly booked?',
+                                ('Yes', 'No'),
+                                key="instant_booking_selector")
+    with col2:
+        beds = st.slider('Number of beds', 
+                         int(data['beds'].min()), 
+                         int(data['beds'].max()), 
+                         int(data['beds'].median()),
+                         key="beds_slider")
+        bedrooms = st.slider('Number of bedrooms', 
+                              int(data['bedrooms'].min()), 
+                              int(data['bedrooms'].max()), 
+                              int(data['bedrooms'].median()),
+                              key="bedrooms_slider")
+        min_nights = st.slider('Minimum number of nights', 
+                               int(data['minimum_nights'].min()), 
+                               int(data['minimum_nights'].max()), 
+                               int(data['minimum_nights'].median()),
+                               key="min_nights_slider")
+        max_nights = st.slider('Maximum number of nights', 
+                               int(data['maximum_nights'].min()), 
+                               int(data['maximum_nights'].max()), 
+                               int(data['minimum_nights'].median()),
+                               key="max_nights_slider")
+
+        amen_options = list(data.columns[-20:])
+        amenities = st.multiselect('Select available amenities',
+                                   amen_options,
+                                   key="amenities_multiselect")
+
+    # Section for host info
+    st.markdown('---')
+    st.subheader('Host Information')
+
+    col1, col2 = st.columns(2)
+    with col1:
+        pic = st.selectbox('Does your host have a profile picture?', 
+                           ('Yes', 'No'),
+                           key="profile_pic_selector")
+        dec = st.selectbox('Did your host write a description about the listing?', 
+                           ('Yes', 'No'),
+                           key="description_selector")
+        super_host = st.selectbox('Is your host a superhost?', 
+                                  ('No', 'Yes'),
+                                  key="super_host_selector")
+        response_rate = st.slider('Response rate', 
+                                  0.0, 1.0, .8, step=.1,
+                                  key="response_rate_slider")
+        accept_rate = st.slider('Acceptance rate', 
+                                0.0, 1.0, .8, step=.1,
+                                key="accept_rate_slider")
+    with col2:
+        verified = st.selectbox('Is your host verified?', 
+                                ('Yes', 'No'),
+                                key="verified_selector")
+        availability = st.selectbox('Is the listing available?', 
+                                    ('Yes', 'No'),
+                                    key="availability_selector")
+        response_time = st.selectbox('Response time', 
+                                     data['host_response_time'].unique(),
+                                     key="response_time_selector")
+        num_review = st.slider('Number of reviews', 
+                               int(data['number_of_reviews'].min()), 
+                               int(data['number_of_reviews'].max()), 
+                               int(data['number_of_reviews'].median()),
+                               key="num_review_slider")
+        num_listings = st.slider('Number of listings', 
+                                 int(data['host_listings_count'].min()), 
+                                 int(data['host_listings_count'].max()), 
+                                 int(data['host_listings_count'].median()),
+                                 key="num_listings_slider")
+
+    st.markdown('---')
+    st.subheader("Guests' feedback")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        overall = st.slider('Overall rating', 
+                            1.0, 5.0, 3.0, step=0.1,
+                            key="overall_rating_slider")
+        location = st.slider('Location rating', 
+                             1.0, 5.0, 3.0, step=0.1,
+                             key="location_rating_slider")
+        checkin = st.slider('Checkin rating', 
+                            1.0, 5.0, 3.0, step=0.1,
+                            key="checkin_rating_slider")
+    with col2:
+        clean = st.slider('Cleanliness rating', 
+                          1.0, 5.0, 3.0, step=0.1,
+                          key="cleanliness_rating_slider")
+        communication = st.slider('Communication rating', 
+                                  1.0, 5.0, 3.0, step=0.1,
+                                  key="communication_rating_slider")
+    with col3:
+        value = st.slider('Value rating', 
+                          1.0, 5.0, 3.0, step=0.1,
+                          key="value_rating_slider")
+        accuracy = st.slider('Accuracy rating', 
+                             1.0, 5.0, 3.0, step=0.1,
+                             key="accuracy_rating_slider")
+        
+    desired_price = st.number_input('Enter Your Desired Price', 
+                                        min_value=50, max_value=2000, value=200,
+                                        key="desired_price_input")
+       # Generate Suggestions
+    st.markdown('---')
+
+    if st.button("Get Suggestions"):
+
+        # Sample rules for suggestions
+        suggestions = []
+
+        # Instant book suggestion
+        if instant == 'No':
+            suggestions.append("Enable instant booking to make your listing more accessible to guests.")
+
+        # Price suggestion
+        similar_accommodates_data = data[data['accommodates'] == accommodates]
+        if not similar_accommodates_data.empty:
+            avg_price = similar_accommodates_data['price'].mean()
+            avg_price = round(avg_price)
+            if desired_price > avg_price * 1.5:
+                suggestions.append(f"Your desired price is significantly higher than the market average for listings with similar capacity (${avg_price}). Consider lowering it to stay competitive.")
+            elif desired_price < avg_price * 0.7:
+                suggestions.append(f"Your desired price is significantly lower than the market average for listings with similar capacity (${avg_price}). Consider raising it to avoid underpricing.")
+            else:
+                pass
+            # Amenities suggestion
+
+        if len(amenities) < 5:
+            suggestions.append("Add more amenities like Wi-Fi, Kitchen, or Air Conditioning to make your listing more appealing.")
+
+        # Superhost suggestion
+        if super_host == 'No':
+            suggestions.append("Strive to become a superhost by maintaining high ratings and response rates.")
+
+        # Reviews suggestion
+        if num_review < 10:
+            suggestions.append("Encourage more guests to leave reviews to build trust and attract more bookings.")
+        
+            # Response time suggestion
+        if response_time not in ['within an hour', 'within a few hours']:
+            suggestions.append("Improve your response time to 'within an hour' or 'within a few hours' to enhance guest satisfaction.")
+
+        # Response rate suggestion
+        if response_rate < 0.8:
+            suggestions.append("Increase your response rate to at least 80% to improve guest confidence in your responsiveness.")
+
+        # Acceptance rate suggestion
+        if accept_rate < 0.7:
+            suggestions.append("Increase your acceptance rate to at least 70% to attract more bookings and improve your listing's ranking.")
+
+        # Availability suggestion
+        if availability == 'No':
+            suggestions.append("Ensure your listing is marked as available to avoid losing potential bookings.")
+
+        # Cleanliness rating suggestion
+        if clean < 4.5:
+            suggestions.append("Focus on improving cleanliness to achieve a rating above 4.5. Guests value cleanliness highly when choosing a property.")
+
+        # Communication rating suggestion
+        if communication < 4.5:
+            suggestions.append("Enhance your communication with guests to achieve a rating above 4.5. Prompt and clear communication builds trust.")
+
+        # Value rating suggestion
+        if value < 4.5:
+            suggestions.append("Ensure your pricing reflects the value of your property. Guests expect value for their money.")
+
+        # Amenities quantity suggestion
+        if len(amenities) < len(data.columns[27:]):
+            suggestions.append("Expand the amenities offered to match similar listings in your area.")
+
+        # Air conditioning suggestion
+        if 'Air conditioning' not in amenities:
+            suggestions.append("Add air conditioning to make your listing more comfortable for guests during hot seasons.")
+
+        # Free parking suggestion
+        if 'Free parking on premises' not in amenities:
+            suggestions.append("Offer free parking on premises to attract guests traveling by car.")
+
+        # Long-term stays suggestion
+        if max_nights < 30:
+            suggestions.append("Allow longer maximum stays to attract guests looking for extended stays.")
+
+        # Pet-friendly suggestion
+        if 'Pet-friendly' not in amenities:
+            suggestions.append("Consider allowing pets to widen your potential guest base.")
+
+        # Overall rating suggestion
+        if overall < 4.5:
+            suggestions.append("Work on improving your overall rating to above 4.5 to build credibility and attract more bookings.")
+
+        # Location rating suggestion
+        if location < 4.5:
+            suggestions.append("Enhance the location experience for guests by providing local tips or improving accessibility.")
+
+        # Safety suggestion
+        if 'Smoke alarm' not in amenities or 'Carbon monoxide alarm' not in amenities:
+            suggestions.append("Ensure safety by adding smoke alarms and carbon monoxide alarms to your property.")
+
+        # Photos suggestion
+        if pic == 'No':
+            suggestions.append("Add high-quality photos of your property to make it more visually appealing to potential guests.")
+
+        
+
+        # Display suggestions
+        if suggestions:
+            st.write("### Suggestions for Improvement:")
+            for suggestion in suggestions:
+                st.markdown(f"- {suggestion}")
 
 
     if 'disabled' not in st.session_state:
