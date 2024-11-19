@@ -13,6 +13,10 @@ Two datasets for the three cities are retrieved from [Inside Airbnb](http://insi
 
 🔍 Data Insights: Visualize key correlations and trends with intuitive graphs.
 
+
+
+
+
 # How to run it on your own machine
 
 1. Install the requirements
