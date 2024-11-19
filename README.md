@@ -13,8 +13,6 @@ Two datasets for the three cities are retrieved from [Inside Airbnb](http://insi
 
 🔍 Data Insights: Visualize key correlations and trends with intuitive graphs.
 
-🌐 User-Friendly Interface: Seamlessly explore and interact with the app, designed with simplicity and functionality in mind.
-
 ### How to run it on your own machine
 
 1. Install the requirements
