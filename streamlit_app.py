@@ -329,23 +329,23 @@ def generate_large_sample_data(n_samples=200):
     # Convert to DataFrame and return
     return pd.DataFrame(data)
 
-large_sample_data = generate_large_sample_data()
-with open('price_pred/xgb_reg.pkl', 'rb') as f:
-    xgb_model = pickle.load(f)
+# large_sample_data = generate_large_sample_data()
+# with open('price_pred/xgb_reg.pkl', 'rb') as f:
+#     xgb_model = pickle.load(f)
 
-# Predict and add predicted prices
-large_sample_data['predicted_price'] = np.exp(xgb_model.predict(large_sample_data))
+# # Predict and add predicted prices
+# large_sample_data['predicted_price'] = np.exp(xgb_model.predict(large_sample_data))
 
-# Save in session state
-st.session_state['X_test_reordered'] = large_sample_data
+# # Save in session state
+# st.session_state['X_test_reordered'] = large_sample_data
 
-relevant_features = [
-    'host_since', 'host_response_rate', 'host_acceptance_rate', 'host_is_superhost',
-    'accommodates', 'bathrooms', 'bedrooms', 'beds', 'minimum_nights', 'availability_30',
-    'number_of_reviews', 'review_scores_rating', 'review_scores_cleanliness',
-    'review_scores_location', 'instant_bookable', 'tv', 'air_conditioning',
-    'heating', 'pool'
-]
+# relevant_features = [
+#     'host_since', 'host_response_rate', 'host_acceptance_rate', 'host_is_superhost',
+#     'accommodates', 'bathrooms', 'bedrooms', 'beds', 'minimum_nights', 'availability_30',
+#     'number_of_reviews', 'review_scores_rating', 'review_scores_cleanliness',
+#     'review_scores_location', 'instant_bookable', 'tv', 'air_conditioning',
+#     'heating', 'pool'
+# ]
 
 
 
