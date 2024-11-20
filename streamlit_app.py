@@ -244,7 +244,8 @@ with tab1:
             X_test = X_test.reindex(columns=expected_features)
 
             # Get predicted price
-            st.info(f"Predicted price is ${round(float(xgb_model.predict(X_test)[0]), 2)}")
+            st.info(f"Predicted price is ${round(abs(float(xgb_model.predict(X_test)[0])), 2)}")
+
 
 # Correlation Visualization in Tab 2
 with tab2:
