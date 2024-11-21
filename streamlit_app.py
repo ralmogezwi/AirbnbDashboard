@@ -104,21 +104,21 @@ with st.container():
     #st.markdown('Provide data about your Airbnb listing and get predictions!')
     st.markdown('Select your desired tab:')
 #Initilaizing 3 tabs
-tab0, tab1, tab2, tab3 = st.tabs(["About", "Price Generation", "Data Vis", "Update Suggestions"])
+tab0, tab1, tab2, tab3 = st.tabs(["About", "Price Generation", "Data Visualization", "Update Suggestions"])
 
 with tab0:
     st.subheader('Welcome to the Airbnb Pricing Dashboard!')
     st.markdown('Are you an Airbnb host? Are you interested in becoming one? This dashboard is for you!')
     st.markdown('Airbnb hosts face a crucial challenge when putting their property up for rental: What should you charge guests per night?')
     st.markdown('There are many factors that influence the market price of an Airbnb listing, far too many to consider comprehensively. That is why we have created a dashboard which allows you to enter information about your listing and provides you with an appropriate price that will generate bookings and revenue. Our price generation model uses an Extreme Gradient Boosting algorithm to consider all the important factors and find you the right price for your listing.')
-    st.markdown('In addition to Price Generation, the dashboard features two additional tabs: Data Vis and Update Suggestions.')
-    st.markdown('Data Vis allows you to see which listing variables correlate most highly with price in your city.')
+    st.markdown('In addition to Price Generation, the dashboard features two additional tabs: Data Visualization and Update Suggestions.')
+    st.markdown('Data Visualization allows you to see which listing variables correlate most highly with price in your city.')
     st.markdown('Update Suggestions allows you to set a price you would like to charge for your listing and provides an itemized list of actions you should take to match your listing profile with that price point. For example, if you are dissatisfied with your generated price of \$100 and would like to charge \$200, we may suggest that you increase the number of people you can accomodate or your average guest rating.')
 
 
 with tab1:
     # Begin new section for listings features
-    st.subheader('Listing characteristics')
+    st.subheader('Listing Information')
     col1, col2 = st.columns(2)
     with col1:
         city = st.selectbox('City',
@@ -177,7 +177,7 @@ with tab1:
         num_listings = st.slider('Number of listings', int(data['host_listings_count'].min()), int(data['host_listings_count'].max()), int(data['host_listings_count'].median()))
     
     st.markdown('---')
-    st.subheader("Guests' feedback")
+    st.subheader("Guest Feedback")
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -274,7 +274,7 @@ with tab2:
     # Save in session state
     st.session_state['vis_data'] = vis_data
     
-    st.subheader("Feature Correlation with Price")
+    st.subheader("Feature Correlation with Listing Price")
 
     # Check if prediction data is available
     if 'vis_data' in st.session_state:
@@ -338,9 +338,9 @@ with tab2:
         st.plotly_chart(fig)
 
 with tab3:
-    st.header("Suggestions for Improving Your Listing")
+    # st.header("Update Suggestions for Reac")
     # Collect listing details from the user
-    st.subheader("Input Your Listing Details")
+    st.subheader("Listing Information")
     col1, col2 = st.columns(2)
     with col1:
         city = st.selectbox('City',
@@ -443,7 +443,7 @@ with tab3:
                                  key="num_listings_slider")
 
     st.markdown('---')
-    st.subheader("Guests' feedback")
+    st.subheader("Guest Feedback")
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -471,11 +471,10 @@ with tab3:
                              1.0, 5.0, 3.0, step=0.1,
                              key="accuracy_rating_slider")
         
+    st.markdown('---')
     desired_price = st.number_input('Enter Your Desired Price', 
                                         min_value=50, max_value=2000, value=200,
                                         key="desired_price_input")
-       # Generate Suggestions
-    st.markdown('---')
 
     if st.button("Get Suggestions"):
 
