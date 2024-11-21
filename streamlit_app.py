@@ -108,12 +108,12 @@ tab0, tab1, tab2, tab3 = st.tabs(["About", "Price Generation", "Data Vis", "Upda
 
 with tab0:
     st.subheader('Welcome to the Airbnb Pricing Dashboard!')
-    st.markdown('Are you an Airbnb host? Are you interested in becoming one? This dashboard is for you!')
-    st.markdown('Airbnb hosts face a crucial challenge when putting their property up for rental: What should you charge guests per night?')
-    st.markdown('There are many factors that influence the market price of an Airbnb listing, far too many to consider comprehensively. That is why we have created a dashboard which allows you to enter information about your listing and provides you with an appropriate price that will generate bookings and revenue. Our price generation model uses an Extreme Gradient Boosting algorithm to consider all the important factors and find you the right price for your listing.')
-    st.markdown('In addition to Price Generation, the dashboard features two additional tabs: Data Vis and Update Suggestions.')
-    st.markdown('Data Vis allows you to see which listing variables correlate most highly with price in your city.')
-    st.markdown('Update Suggestions allows you to set a price you would like to charge for your listing and provides an itemized list of actions you should take to match your listing profile with that price point. For example, if you are dissatisfied with your generated price of $100 and would like to charge $200, we may suggest that you increase the number of people you can accomodate or your average guest rating.')
+    st.text('Are you an Airbnb host? Are you interested in becoming one? This dashboard is for you!')
+    st.text('Airbnb hosts face a crucial challenge when putting their property up for rental: What should you charge guests per night?')
+    st.text('There are many factors that influence the market price of an Airbnb listing, far too many to consider comprehensively. That is why we have created a dashboard which allows you to enter information about your listing and provides you with an appropriate price that will generate bookings and revenue. Our price generation model uses an Extreme Gradient Boosting algorithm to consider all the important factors and find you the right price for your listing.')
+    st.text('In addition to Price Generation, the dashboard features two additional tabs: Data Vis and Update Suggestions.')
+    st.text('Data Vis allows you to see which listing variables correlate most highly with price in your city.')
+    st.text('Update Suggestions allows you to set a price you would like to charge for your listing and provides an itemized list of actions you should take to match your listing profile with that price point. For example, if you are dissatisfied with your generated price of $100 and would like to charge $200, we may suggest that you increase the number of people you can accomodate or your average guest rating.')
 
 
 with tab1:
